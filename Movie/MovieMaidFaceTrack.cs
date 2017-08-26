@@ -1,0 +1,128 @@
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using System;
+using System.Linq;
+using CM3D2.HandmaidsTale.Plugin;
+
+namespace CM3D2.HandmaidsTale.Plugin
+{
+    public class MovieMaidFaceTrack : MovieTrack
+    {
+        public Maid maid;
+        public TMorph targetMorph;
+
+        private static readonly string[,] faceVals = new string[,]
+            {
+                { "eyeclose",   "目閉じ",      "0", "1" },
+                { "eyeclose2",  "にっこり",     "0", "0" },
+                { "eyeclose3",  "ジト目",      "0", "0" },
+                { "eyebig",     "見開く",      "0", "0" },
+                { "eyeclose5",  "ウィンク1",    "0", "0" },
+                { "eyeclose6",  "ウィンク2",    "0", "0" },
+                { "hitomis",    "瞳小",       "0", "0" },
+
+                { "mayuv",      "眉キリッ",     "0", "1" },
+                { "mayuw",      "眉困り",      "0", "0" },
+                { "mayuha",     "眉ハの字",     "0", "0" },
+                { "mayuup",     "眉上げ",      "0", "0" },
+                { "mayuvhalf",  "眉傾き",      "0", "0" },
+
+                { "mouthup",   "口角上げ",      "0", "1" },
+                { "mouthdw",   "口角下げ",      "0", "0" },
+                { "mouthuphalf",   "口角左上げ", "0", "0" },
+                { "mouthhe",   "への字口",      "0", "0" },
+
+                { "moutha",     "口あ",       "0", "1" },
+                { "mouthc",     "口う",       "0", "0" },
+                { "mouthi",     "口い",       "0", "0" },
+                { "mouths",     "口笑顔",      "0", "0" },
+
+                { "tangout",    "舌出し1",     "0", "1" },
+                { "tangup",     "舌出し2",     "0", "0" },
+                { "tangopen",   "舌根上げ",     "0", "0" },
+                { "toothoff",   "歯オフ",      "0", "0" },
+
+                { "hohos",      "頬1",           "1", "2" },
+                { "hoho",       "頬2",           "1", "0" },
+                { "hohol",      "頬3",           "1", "0" },
+
+                { "tear1",      "涙1",           "1", "2" },
+                { "tear2",      "涙2",           "1", "0" },
+                { "tear3",      "涙3",           "1", "0" },
+
+                { "yodare",     "よだれ",          "1", "2" },
+                { "hoho2",      "赤面",           "1", "0" },
+                { "shock",      "ショック",     "1", "0" },
+
+                { "namida",     "涙",           "1",  "2" },
+                { "hitomih",    "ハイライト",   "1", "0" },
+                { "nosefook",    "鼻フック",        "1", "0" },
+            };
+        //"uru-uru","ウルウル",
+
+        public MovieMaidFaceTrack(Maid maid) : base()
+        {
+            this.maid = maid;
+            this.targetMorph = maid.body0.Face.morph;
+        }
+
+        public override void AddClipInternal(MovieCurveClip clip)
+        {
+            for(int i = 0; i < faceVals.GetLength(0); i++)
+            {
+                clip.AddCurve(new MovieCurve(clip.length, 0, faceVals[i, 1]));
+            }
+            // clip.AddCurve(new MovieCurve(clip.length, 0, "Length"));
+        }
+
+        public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
+        {
+            maid.boMabataki = false;
+            maid.boFaceAnime = false;
+            for(int i = 0; i < clip.curves.Count; i++)
+            {
+                String key = faceVals[i, 0];
+                if (targetMorph.Contains(key))
+                {
+                    // if (bd.key == "nosefook")
+                    //     maid.boNoseFook = bd.val > 0f ? true : false;
+                    // else if (bd.key == "hitomih")
+                    //     morph.BlendValues[(int)morph.hash[bd.key]] = bd.val * 3;
+                    // else
+                    targetMorph.BlendValues[(int)targetMorph.hash[key]] = clip.curves[i].Evaluate(sampleTime);
+                }
+            }
+            targetMorph.FixBlendValues_Face();
+        }
+
+        public override void DrawPanel(float currentTime)
+        {
+            Rect rect = new Rect(0, 0, 25, 15);
+            if (GUI.Button(rect, "+"))
+            {
+                TODO: Pick face prop to edit here
+            }
+
+            rect.x = 25;
+            if (GUI.Button(rect, "K"))
+            {
+                this.InsertKeyframeAtTime(currentTime);
+            }
+
+            rect.x = 0;
+            rect.y += rect.height;
+            if (GUI.Button(rect, "C"))
+            {
+                this.InsertClipAtFreePos();
+            }
+
+            rect.x = 25;
+            if (GUI.Button(rect, "-"))
+            {
+                this.Delete();
+            }
+        }
+    }
+}

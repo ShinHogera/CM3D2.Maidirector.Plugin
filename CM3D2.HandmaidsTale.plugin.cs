@@ -295,10 +295,7 @@ namespace CM3D2.HandmaidsTale.Plugin
         ///-------------------------------------------------------------------------
         private bool Enable
         {
-            get
-            {
-                return this.IsPhotoMode;
-            }
+            get => true || this.IsPhotoMode;
         }
 
         ///-------------------------------------------------------------------------
@@ -306,10 +303,8 @@ namespace CM3D2.HandmaidsTale.Plugin
         ///-------------------------------------------------------------------------
         private bool IsEditMode
         {
-            get
-            {
-                return this.sceneNo == ConstantValues.Scene.SceneEdit && CharacterMgr.EditModeLookHaveItem;
-            }
+            get => this.sceneNo == ConstantValues.Scene.SceneEdit &&
+                CharacterMgr.EditModeLookHaveItem;
         }
 
         ///-------------------------------------------------------------------------
@@ -340,10 +335,7 @@ namespace CM3D2.HandmaidsTale.Plugin
         ///-------------------------------------------------------------------------
         private bool IsPhotoMode
         {
-            get
-            {
-                return this.sceneNo == ConstantValues.Scene.ScenePhoto;
-            }
+            get => this.sceneNo == ConstantValues.Scene.ScenePhoto;
         }
 
         #endregion

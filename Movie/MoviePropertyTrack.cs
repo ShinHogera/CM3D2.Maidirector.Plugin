@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
-using CM3D2.HandmaidsTale.Plugin;
 
 namespace CM3D2.HandmaidsTale.Plugin
 {
@@ -137,8 +136,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             rect.x = 25;
             if (GUI.Button(rect, "-"))
             {
-                if(this.propsToChange.Any())
-                    this.RemoveProp(0);
+                this.Delete();
             }
         }
     }

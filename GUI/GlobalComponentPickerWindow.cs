@@ -34,7 +34,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
-        public static void Set(Vector2 p, float fWidth, int iFontSize, Action<GameObject, Component> f)
+        public static void Set(Vector2 p, float fWidth, int iFontSize, Action<MovieTrack> f)
         {
             color.Set(p, fWidth, iFontSize, f);
         }
@@ -53,7 +53,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             public bool show { get; private set; }
 
-            public Action<GameObject, Component> func { get; private set; }
+            public Action<MovieTrack> func { get; private set; }
 
             private GUIStyle gsLabel { get; set; }
             private GUIStyle gsButton { get; set; }
@@ -61,35 +61,43 @@ namespace CM3D2.HandmaidsTale.Plugin
             private List<GameObject> gameObjects;
             private List<Component> components;
 
+            private CustomComboBox trackTypeBox;
             private CustomComboBox objectBox;
             private CustomComboBox componentBox;
+            private CustomComboBox maidBox;
             private CustomButton okButton;
             private CustomButton cancelButton;
 
             private GameObject selectedObject
             {
-                get
-                {
-                    return this.gameObjects[objectBox.SelectedIndex];
-                }
+                get => this.gameObjects[objectBox.SelectedIndex];
             }
 
             private Component selectedComponent
             {
-                get
-                {
-                    return this.components[componentBox.SelectedIndex];
-                }
+                get => this.components[componentBox.SelectedIndex];
+            }
+
+            private Maid selectedMaid
+            {
+                get => GameMain.Instance.CharacterMgr.GetMaid(maidBox.SelectedIndex);
             }
 
             public ComponentWindow(int iWIndowID)
             {
                 WINDOW_ID = iWIndowID;
 
+                this.trackTypeBox = new CustomComboBox( Enum.GetNames(typeof(TrackType) ));
+                this.trackTypeBox.SelectedIndexChanged += this.SelectTrackType;
+
+                // Object property track
                 this.objectBox = new CustomComboBox();
                 this.objectBox.SelectedIndexChanged += this.SelectObject;
                 this.componentBox = new CustomComboBox();
                 this.componentBox.SelectedIndexChanged += this.SelectComponent;
+
+                // Maid track
+                this.maidBox = new CustomComboBox();
 
                 this.okButton = new CustomButton();
                 this.okButton.Text = "OK";
@@ -99,7 +107,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.cancelButton.Click = this.Cancel;
             }
 
-            public void Set(Vector2 p, float fWidth, int iFontSize, Action<GameObject, Component> f)
+            public void Set(Vector2 p, float fWidth, int iFontSize, Action<MovieTrack> f)
             {
                 rect = new Rect(p.x - fWidth, p.y, fWidth, 0f);
                 fRightPos = p.x + fWidth;
@@ -120,19 +128,43 @@ namespace CM3D2.HandmaidsTale.Plugin
                 show = true;
 
                 this.LoadObjects();
+                this.LoadMaids();
             }
 
-            private bool IsPermittedGameObject(GameObject go)
-            {
-                return go.activeInHierarchy &&
-                    !go.GetComponents<Component>().Any(c => c.GetType().Name.StartsWith("UI"));
-            }
+            private bool IsPermittedGameObject(GameObject go) => go.activeInHierarchy &&
+                !go.GetComponents<Component>().Any(c => c.GetType().Name.StartsWith("UI"));
 
             private void LoadObjects()
             {
                 this.gameObjects = UnityEngine.Object.FindObjectsOfType<GameObject>().Where(this.IsPermittedGameObject).ToList();
                 this.objectBox.Items = this.gameObjects.Select(go => new GUIContent(go.name)).ToList();
                 this.objectBox.SelectedIndex = 0;
+            }
+
+            private void LoadMaids()
+            {
+                List<string> maidNames = new List<string>();
+                for(int i = 0; i < GameMain.Instance.CharacterMgr.GetMaidCount(); i++)
+                {
+                    Maid maid = GameMain.Instance.CharacterMgr.GetMaid(i);
+                    if(IsValidMaid(maid))
+                    {
+                        maidNames.Add(maid.name);
+                    }
+                    else
+                    {
+                        maidNames.Add("");
+                    }
+                }
+                this.maidBox.Items = maidNames.Select(mn => new GUIContent(mn)).ToList();
+                this.maidBox.SelectedIndex = 0;
+            }
+
+            private static bool IsValidMaid(Maid maid) => maid != null && maid.body0.trsHead != null && maid.Visible;
+
+            private void SelectTrackType(object sender, EventArgs args)
+            {
+
             }
 
             private void SelectObject(object sender, EventArgs args)
@@ -153,7 +185,22 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             private void Ok(object sender, EventArgs args)
             {
-                func(this.selectedObject, this.selectedComponent);
+                if(this.trackTypeBox.SelectedIndex == (int)TrackType.ObjectProperty)
+                {
+                    func(new MoviePropertyTrack(this.selectedObject, this.selectedComponent));
+                }
+                else if(this.trackTypeBox.SelectedIndex == (int)TrackType.CameraTarget)
+                {
+                    func(new MovieCameraTargetTrack());
+                }
+                else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation)
+                {
+                    func(new MovieMaidAnimationTrack(this.selectedMaid));
+                }
+                else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace)
+                {
+                    func(new MovieMaidFaceTrack(this.selectedMaid));
+                }
                 this.show = false;
             }
 
@@ -167,14 +214,29 @@ namespace CM3D2.HandmaidsTale.Plugin
                 int iFontSize = gsLabel.fontSize;
                 Rect rectItem = new Rect(iFontSize * 0.5f, iFontSize * 0.5f, rect.width - iFontSize * 0.5f, iFontSize * 1.5f);
 
-                this.objectBox.SetFromRect(rectItem);
-                this.objectBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
-                this.objectBox.OnGUI();
+                this.trackTypeBox.SetFromRect(rectItem);
+                this.trackTypeBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                this.trackTypeBox.OnGUI();
 
                 rectItem.y += rectItem.height;
-                this.componentBox.SetFromRect(rectItem);
-                this.componentBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
-                this.componentBox.OnGUI();
+                if(this.trackTypeBox.SelectedIndex == (int)TrackType.ObjectProperty)
+                {
+                    this.objectBox.SetFromRect(rectItem);
+                    this.objectBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.objectBox.OnGUI();
+
+                    rectItem.y += rectItem.height;
+                    this.componentBox.SetFromRect(rectItem);
+                    this.componentBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.componentBox.OnGUI();
+                }
+                else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation ||
+                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace)
+                {
+                    this.maidBox.SetFromRect(rectItem);
+                    this.maidBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.maidBox.OnGUI();
+                }
 
                 rectItem.y += rectItem.height;
                 rectItem.width = (rect.width - iFontSize * 0.5f) / 2;
@@ -212,6 +274,14 @@ namespace CM3D2.HandmaidsTale.Plugin
                 return Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2);
             }
 
+
+            private enum TrackType
+            {
+                ObjectProperty,
+                CameraTarget,
+                MaidAnimation,
+                MaidFace
+            }
         }
     }
 }

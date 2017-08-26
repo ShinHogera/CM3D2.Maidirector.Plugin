@@ -6,9 +6,9 @@ using System;
 using System.Linq;
 using CM3D2.HandmaidsTale.Plugin;
 
-public class MovieCameraTargetRotationTrack : MovieTrack
+public class MovieCameraTargetTrack : MovieTrack
 {
-    public MovieCameraTargetRotationTrack() : base() {}
+    public MovieCameraTargetTrack() : base() {}
 
     public override void AddClipInternal(MovieCurveClip clip)
     {

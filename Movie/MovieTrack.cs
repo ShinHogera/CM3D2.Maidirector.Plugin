@@ -7,6 +7,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 {
     public abstract class MovieTrack {
         public List<MovieCurveClip> clips;
+        public bool wantsDelete { get; private set; }
 
         public MovieTrack()
         {
@@ -41,6 +42,11 @@ namespace CM3D2.HandmaidsTale.Plugin
         public abstract void AddClipInternal(MovieCurveClip clip);
         public abstract void DrawPanel(float currentTime);
 
+        public void Delete()
+        {
+            this.wantsDelete = true;
+        }
+
         public void AddClip(MovieCurveClip clip)
         {
             if(this.CanInsertClip(clip.frame, clip.length))
@@ -50,11 +56,12 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
-        public bool CanInsertClip(int frame, int length)
+        public bool CanInsertClip(int frame, int length, MovieCurveClip ignore = null)
         {
             for (int i = frame; i < frame + length; i++)
             {
-                if (this.GetClipForTime(i) != null)
+                MovieCurveClip at = this.GetClipForTime(i);
+                if (at != null && (ignore != null && ignore != at))
                     return false;
             }
 

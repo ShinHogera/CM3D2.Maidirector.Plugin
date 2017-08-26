@@ -20,7 +20,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public TimelineWindow(int fontSize, int id) : base(fontSize, id)
         {
-            this.tracks = new List<MoviePropertyTrack>();
+            this.tracks = new List<MovieTrack>();
             this.dragging = new List<bool>();
             this.dragMode = DragMode.Drag;
 
@@ -96,6 +96,14 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 this.scrollPosition = GUI.BeginScrollView(rectScroll, this.scrollPosition, rectScrollView);
 
+
+                for(int i = this.tracks.Count - 1; i >= 0; i--)
+                {
+                    if(this.tracks[i].wantsDelete)
+                    {
+                        this.tracks.RemoveAt(i);
+                    }
+                }
                 for (int i = 0; i < this.tracks.Count; i++)
                 {
                     this.drawTrack(i);
@@ -147,8 +155,8 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 GUI.BeginGroup(curveRect);
                 if (this.tracks.Count > 0 &&
-                    this.tracks[this.selectedTrack] != null &&
-                    this.tracks[this.selectedTrack].clips[this.selectedClip] != null)
+                    this.selectedTrack < this.tracks.Count &&
+                    this.selectedClip < this.tracks[this.selectedTrack].clips.Count)
                     this.curvePane.Draw(curveRect, this.tracks[this.selectedTrack].clips, this.selectedClip, this.selectedTrack);
                 GUI.EndGroup();
                 if (this.curvePane.needsUpdate)
@@ -168,7 +176,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                 {
                     track.PreviewTime(this.playTime);
                 }
-                //this.seekerPos = this.playTime * framesPerSecond * pixelsPerFrame;
                 this.playTime += Time.deltaTime;
             }
             else
@@ -200,14 +207,12 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         private void Add(object sender, EventArgs args)
         {
-            GlobalComponentPicker.Set(new Vector2(100, 100), 200, this.FontSize, (g, c) =>
-            {
-                MoviePropertyTrack existing = new MoviePropertyTrack(g, c);
-
-                existing.InsertClipAtFreePos();
-                this.tracks.Add(existing);
-                this.curvePane.SetUpdate();
-            });
+            GlobalComponentPicker.Set(new Vector2(100, 100), 200, this.FontSize, (existing) =>
+                    {
+                        existing.InsertClipAtFreePos();
+                        this.tracks.Add(existing);
+                        this.curvePane.SetUpdate();
+                    });
         }
 
         private void drawTrack(int index)
@@ -230,12 +235,12 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUILayout.EndArea();
         }
 
-        private void drawClip(ref MovieCurveClip clip, MoviePropertyTrack track, int trackIdx, int clipIdx)
+        private void drawClip(ref MovieCurveClip clip, MovieTrack track, int trackIdx, int clipIdx)
         {
             Rect rect = new Rect((clip.frame * pixelsPerFrame) + ControlBase.FixedMargin,
-                0,
-                (clip.length * pixelsPerFrame),
-                this.ControlHeight * 2);
+                                 0,
+                                 (clip.length * pixelsPerFrame),
+                                 this.ControlHeight * 2);
 
             int pixelDiffToFramePos = (int)((Input.mousePosition.x - this.ScreenPos.x) / pixelsPerFrame) - 50;
 
@@ -249,27 +254,31 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             if (clip.isDragging)
             {
-                if (this.dragMode == DragMode.Drag)
+                switch(this.dragMode)
                 {
-                    int newFrame = pixelDiffToFramePos - (int)((clip.length / 4 * pixelsPerFrame));
-                    if (track.CanInsertClip(newFrame, clip.length))
-                        clip.frame = newFrame;
-                }
-                else if (this.dragMode == DragMode.LeftResize)
-                {
+                    case DragMode.Drag:
+                        int newFrame = pixelDiffToFramePos - (int)((clip.length / 4 * pixelsPerFrame));
+                        if (track.CanInsertClip(newFrame, clip.length, clip))
+                            clip.frame = newFrame;
+                        else if(newFrame <= 0)
+                            clip.frame = 0;
+                        break;
 
+                    case DragMode.RightResize:
+                        int newEnd = pixelDiffToFramePos + 15;
+                        if (track.CanInsertClip(clip.frame, newEnd - clip.length))
+                            clip.end = newEnd;
+                        break;
+
+                    default:
+                        break;
                 }
-                else if (this.dragMode == DragMode.RightResize)
-                {
-                    int newEnd = pixelDiffToFramePos + (int)((clip.length / 2 * pixelsPerFrame));
-                    if (track.CanInsertClip(clip.frame, newEnd - clip.length))
-                        clip.end = newEnd;
-                }
+
                 this.updated = true;
             }
             else if (clip.wasClicked)
             {
-                 this.updated = true;
+                this.updated = true;
             }
         }
 
@@ -317,25 +326,35 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         #region Fields
         private static readonly string[] DRAG_MODES = new string[]
-        {
-           "[",
-           "Drag",
-           "]"
-        };
+            {
+                "[",
+                "Drag",
+                "]"
+            };
 
         private bool isPlaying;
 
         private float _playTime;
         private float playTime
         {
-            get
-            {
-                return _playTime;
-            }
+            get => _playTime;
             set
             {
                 _playTime = value;
-                this.seekerPos = _playTime * framesPerSecond * pixelsPerFrame;
+                this._seekerPos = _playTime * framesPerSecond * pixelsPerFrame;
+                this.updated = true;
+            }
+        }
+
+        private float _seekerPos = 0f;
+        private float seekerPos
+        {
+            get => _seekerPos;
+            set
+            {
+                _seekerPos = value;
+                this._playTime = _seekerPos / (framesPerSecond * pixelsPerFrame);
+                this.updated = true;
             }
         }
 
@@ -345,10 +364,9 @@ namespace CM3D2.HandmaidsTale.Plugin
         private CustomButton addButton = null;
         private CurvePane curvePane;
 
-        private List<MoviePropertyTrack> tracks;
+        private List<MovieTrack> tracks;
         private List<bool> dragging;
         private bool draggingSeeker;
-        private float seekerPos = 0f;
         private bool updated = false;
         private DragMode dragMode;
         private Vector2 scrollPosition;
