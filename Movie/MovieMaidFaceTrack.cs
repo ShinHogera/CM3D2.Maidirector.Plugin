@@ -12,6 +12,7 @@ namespace CM3D2.HandmaidsTale.Plugin
     {
         public Maid maid;
         public TMorph targetMorph;
+        private List<int> curveIdxToFaceValIdx;
 
         private static readonly string[,] faceVals = new string[,]
             {
@@ -44,21 +45,21 @@ namespace CM3D2.HandmaidsTale.Plugin
                 { "tangopen",   "舌根上げ",     "0", "0" },
                 { "toothoff",   "歯オフ",      "0", "0" },
 
-                { "hohos",      "頬1",           "1", "2" },
-                { "hoho",       "頬2",           "1", "0" },
-                { "hohol",      "頬3",           "1", "0" },
+                // { "hohos",      "頬1",           "1", "2" },
+                // { "hoho",       "頬2",           "1", "0" },
+                // { "hohol",      "頬3",           "1", "0" },
 
-                { "tear1",      "涙1",           "1", "2" },
-                { "tear2",      "涙2",           "1", "0" },
-                { "tear3",      "涙3",           "1", "0" },
+                // { "tear1",      "涙1",           "1", "2" },
+                // { "tear2",      "涙2",           "1", "0" },
+                // { "tear3",      "涙3",           "1", "0" },
 
-                { "yodare",     "よだれ",          "1", "2" },
-                { "hoho2",      "赤面",           "1", "0" },
-                { "shock",      "ショック",     "1", "0" },
+                // { "yodare",     "よだれ",          "1", "2" },
+                // { "hoho2",      "赤面",           "1", "0" },
+                // { "shock",      "ショック",     "1", "0" },
 
-                { "namida",     "涙",           "1",  "2" },
-                { "hitomih",    "ハイライト",   "1", "0" },
-                { "nosefook",    "鼻フック",        "1", "0" },
+                // { "namida",     "涙",           "1",  "2" },
+                // { "hitomih",    "ハイライト",   "1", "0" },
+                // { "nosefook",    "鼻フック",        "1", "0" },
             };
         //"uru-uru","ウルウル",
 
@@ -66,15 +67,38 @@ namespace CM3D2.HandmaidsTale.Plugin
         {
             this.maid = maid;
             this.targetMorph = maid.body0.Face.morph;
+            this.curveIdxToFaceValIdx = new List<int>();
+        }
+
+        private void AddCurve(MovieCurveClip clip, int faceValIndex)
+        {
+            clip.AddCurve(new MovieCurve(clip.length, 0, faceVals[faceValIndex, 1]));
+        }
+
+        private void AddCurveToAll(int faceValIndex)
+        {
+            foreach(MovieCurveClip clip in this.clips)
+            {
+                this.AddCurve(clip, faceValIndex);
+            }
+            this.curveIdxToFaceValIdx.Add(faceValIndex);
+        }
+
+        private void RemoveCurve(int curveIndex)
+        {
+            foreach(MovieCurveClip clip in this.clips)
+            {
+                clip.curves.RemoveAt(curveIndex);
+            }
+            this.curveIdxToFaceValIdx.RemoveAt(curveIndex);
         }
 
         public override void AddClipInternal(MovieCurveClip clip)
         {
-            for(int i = 0; i < faceVals.GetLength(0); i++)
+            for(int i = 0; i < this.curveIdxToFaceValIdx.Count; i++)
             {
-                clip.AddCurve(new MovieCurve(clip.length, 0, faceVals[i, 1]));
+                this.AddCurve(clip, this.curveIdxToFaceValIdx[i]);
             }
-            // clip.AddCurve(new MovieCurve(clip.length, 0, "Length"));
         }
 
         public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
@@ -102,7 +126,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             Rect rect = new Rect(0, 0, 25, 15);
             if (GUI.Button(rect, "+"))
             {
-                TODO: Pick face prop to edit here
+                // TODO: Pick face prop to edit here
             }
 
             rect.x = 25;

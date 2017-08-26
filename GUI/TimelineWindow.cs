@@ -160,7 +160,9 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.curvePane.Draw(curveRect, this.tracks[this.selectedTrack].clips, this.selectedClip, this.selectedTrack);
                 GUI.EndGroup();
                 if (this.curvePane.needsUpdate)
+                {
                     this.updated = true;
+                }
             }
             catch (Exception e)
             {
@@ -284,44 +286,29 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         private int currentFrame
         {
-            get
-            {
-                return (int)(this.seekerPos * posAdjustment);
-            }
+            get =>(int)(this.seekerPos * posAdjustment);
         }
 
         public static readonly float FACTOR = 1f / 60f;
 
-        private float zoom
+        public static float zoom
         {
-            get
-            {
-                return 50.0f;
-            }
+            get => 50.0f;
         }
 
-        private float posAdjustment
+        public static float posAdjustment
         {
-            get
-            {
-                return FACTOR * zoom;
-            }
+            get => FACTOR * zoom;
         }
 
-        private float pixelsPerFrame
+        public static float pixelsPerFrame
         {
-            get
-            {
-                return 1 / (FACTOR * zoom);
-            }
+            get => 1 / (FACTOR * zoom);
         }
 
-        private float framesPerSecond
+        public static float framesPerSecond
         {
-            get
-            {
-                return 1 / FACTOR;
-            }
+            get => 1 / FACTOR;
         }
 
         #region Fields
