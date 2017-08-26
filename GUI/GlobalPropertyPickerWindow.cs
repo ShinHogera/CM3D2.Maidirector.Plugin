@@ -133,7 +133,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.propertyBox.Items = this.properties.Select(pr => new GUIContent(pr.Name)).ToList();
                 this.propertyBox.SelectedIndex = 0;
 
-                FIX
                 this.fields = component.GetType().GetFields().Where(fi => MovieProperty.IsSupportedType(fi.FieldType)).ToList();
                 this.fieldBox.Items = this.fields.Select(fi => new GUIContent(fi.Name)).ToList();
                 this.fieldBox.SelectedIndex = 0;

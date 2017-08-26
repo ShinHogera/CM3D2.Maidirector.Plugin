@@ -2,31 +2,34 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class MovieCurve
 {
-    public List<MovieKeyframe> keyframes;
+    //public List<MovieKeyframe> keyframes;
+    public AnimationCurve curve;
+    public Keyframe[] keyframes
+    {
+        get => this.curve.keys;
+    }
+
     private int length;
     public string name;
 
     private int keyframeCount
     {
-        get
-        {
-            return this.keyframes.Count();
-        }
+        get => this.keyframes.Count();
     }
 
     public MovieCurve(int length, float value, string name)
     {
         this.length = length;
         this.name = name;
-        this.keyframes = new List<MovieKeyframe>(new MovieKeyframe[]
+        this.curve = new AnimationCurve(new Keyframe[]
         {
-            new MovieKeyframe(0, value),
-            new MovieKeyframe(.2f, value, AMTween.EaseType.easeInOutSine),
-            new MovieKeyframe(.5f, value, AMTween.EaseType.easeOutSine),
-            new MovieKeyframe(1, value, AMTween.EaseType.easeInSine),
+            new Keyframe(0, value),
+            new Keyframe(.5f, value),
+            new Keyframe(1, value),
         });
     }
 
@@ -34,6 +37,8 @@ public class MovieCurve
     {
         get
         {
+            if (this.keyframes.Length == 0)
+                return 0f;
             return this.keyframes.OrderByDescending(key => key.value).First().value;
         }
     }
@@ -42,11 +47,13 @@ public class MovieCurve
     {
         get
         {
+            if (this.keyframes.Length == 0)
+                return 0f;
             return this.keyframes.OrderBy(key => key.value).First().value;
         }
     }
 
-    public void AddKeyframe(MovieKeyframe keyframe)
+    public void AddKeyframe(Keyframe keyframe)
     {
         if(keyframe.time < 0f || keyframe.time > 1f)
         {
@@ -54,49 +61,40 @@ public class MovieCurve
             return;
         }
 
-        this.keyframes.Add(keyframe);
+        this.curve.AddKey(keyframe);
         this.SortKeyframes();
     }
 
     public void SortKeyframes()
     {
-        this.keyframes.Sort((a, b) => a.time.CompareTo(b.time));
+        //this.keyframes.Sort((a, b) => a.time.CompareTo(b.time));
     }
 
     public float Evaluate(float time)
     {
-        var before = this.keyframes[this.GetKeyFrameOnOrBeforeTime(time, true)];
-        var after = this.keyframes[this.GetKeyFrameAfterTime(time, true)];
+        time = Mathf.Clamp01(time);
 
-        float t = Mathf.InverseLerp(before.time, after.time, time);
-
-        return after.ease(before.value, after.value, t, null);
+        return this.curve.Evaluate(time);
     }
 
-    public float EvaluateFrame(int frame)
-    {
-        return this.Evaluate(this.length / frame);
-    }
-    
+    public float EvaluateFrame(int frame) => this.Evaluate(this.length / frame);
+
     public void InsertKeyframeAtTime(float time)
     {
         float value = this.Evaluate(time);
-        this.AddKeyframe(new MovieKeyframe(time, value, AMTween.EaseType.easeInOutSine));
+        this.AddKeyframe(new Keyframe(time, value, .5f, .5f));
     }
 
-    private int keyframeTimeToFrame(MovieKeyframe keyframe)
+    private int keyframeTimeToFrame(Keyframe keyframe) => (int)(keyframe.time * this.length);
+
+    public Keyframe GetKeyOnFrame(int frame)
     {
-        return (int)(keyframe.time * this.length);
-    }
-    
-    public MovieKeyframe GetKeyOnFrame(int frame)
-    {
-        foreach (MovieKeyframe key in this.keyframes)
+        foreach (Keyframe key in this.keyframes)
         {
             if (this.keyframeTimeToFrame(key) == frame) return key;
         }
         Debug.LogError("No key found on frame " + frame);
-        return new MovieKeyframe();
+        return new Keyframe();
     }
 
     public int GetKeyFrameOnOrBeforeTime(float time, bool wholeTake)
@@ -135,5 +133,27 @@ public class MovieCurve
         if (keyframeCount > 0) return keyframeCount - 1;
         Debug.LogError("No key found before frame " + frame);
         return -1;
+    }
+
+    private bool CanMoveKey(int j, Keyframe next)
+    {
+        if (j != 0)
+        {
+            if (next.time <= this.curve.keys[j - 1].time)
+                return false;
+        }
+        if (j != this.curve.keys.Length - 1)
+        {
+            if (next.time >= this.curve.keys[j + 1].time)
+                return false;
+        }
+
+        return true;
+    }
+
+    public void TryMoveKey(int j, Keyframe key)
+    {
+        if(this.CanMoveKey(j, key))
+            this.curve.MoveKey(j, key);
     }
 }

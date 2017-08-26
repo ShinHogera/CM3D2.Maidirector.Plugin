@@ -2066,6 +2066,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this._value = value;
             }
         }
-        public Vector2 ScreenOffset;
+        public Vector2 ScreenOffset = Vector2.zero;
     }
 }

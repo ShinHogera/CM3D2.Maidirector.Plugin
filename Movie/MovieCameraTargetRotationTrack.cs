@@ -56,8 +56,6 @@ public class MovieCameraTargetRotationTrack : MovieTrack
         if (GUI.Button(rect, "K"))
         {
             this.InsertKeyframeAtTime(currentTime);
-            if (GlobalMovieCurveWindow.Visible)
-                GlobalMovieCurveWindow.Visible = false;
         }
 
         rect.x = 0;

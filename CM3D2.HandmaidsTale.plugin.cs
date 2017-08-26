@@ -51,7 +51,7 @@ namespace CM3D2.HandmaidsTale.Plugin
     ///					モーション一時停止後、選択対象メイドを切り替えるとモーションの一時停止が解除される不具合
     /// </remarks>
     ///=========================================================================
-    [PluginFilter( "CM3D2x64" ), PluginFilter( "CM3D2x86" ), PluginFilter( "CM3D2VRx64" ), PluginName( "CM3D2.HandmaidsTale.Plugin" ), PluginVersion( "0.3.0.0" )]
+    [PluginFilter( "CM3D2x64" ), PluginFilter( "CM3D2x86" ), PluginFilter( "CM3D2VRx64" ), PluginName( "CM3D2.HandmaidsTale.Plugin" ), PluginVersion( "0.0.1.0" )]
     public class HandmaidsTale : PluginBase
     {
         #region Methods
@@ -66,6 +66,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 // モーション情報初期化
                 ReadPluginPreferences();
+                CurveTexture.Init();
                 // ConstantValues.Initialize();
                 // Translation.Initialize(configLanguage);
                 // Util.LoadShaders();
@@ -117,8 +118,8 @@ namespace CM3D2.HandmaidsTale.Plugin
         {
             try
             {
-                if(this.Enable)
-                {
+                // if(this.Enable)
+                // {
                     if (!initialized) {
                         {
                             this.Initialize();
@@ -142,7 +143,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                     // {
                         this.timelineWindow.Update();
                     // }
-                }
+                // }
             }
             catch( Exception e )
             {
@@ -176,19 +177,16 @@ namespace CM3D2.HandmaidsTale.Plugin
                         Rect pluginPos = new Rect( Screen.width - windowWidth, Screen.height / 15 + ControlBase.FixedMargin, Screen.width / 5 - Screen.width / 65, Screen.height - Screen.height / 5 );
 
                         if(selectedMode == ConstantValues.EditMode.Movie){
-                            this.timelineWindow.rectGui.x = 110;
-                            this.timelineWindow.rectGui.y = 110;
-                            this.timelineWindow.Left = Screen.width / 2 - 500;
-                            this.timelineWindow.Top = Screen.height - 500;
                             this.timelineWindow.Width = 1000;
+                            this.timelineWindow.Height = 800;
                             this.timelineWindow.rectGui.width = 1000;
+                            this.timelineWindow.rectGui.height = 800;
                             this.timelineWindow.OnGUI();
                         }
 
                         // update external windows
                         // only one of these are ever needed at a time
                         GlobalCurveWindow.Update();
-                        GlobalMovieCurveWindow.Update();
                         GlobalComponentPicker.Update();
                         GlobalPropertyPicker.Update();
                         GlobalComboBox.Update();
@@ -228,7 +226,13 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 float windowWidth = Screen.width / 4 - ControlBase.FixedMargin * 2;
 
-                this.timelineWindow = new TimelineWindow(fontSize, 100);
+                this.timelineWindow = new TimelineWindow(fontSize, 401);
+                timelineWindow.Left = 0;
+                timelineWindow.Top = 0;
+                timelineWindow.Width = 1000;
+                timelineWindow.Height = 800;
+                timelineWindow.rectGui.x = 110;
+                timelineWindow.rectGui.y = 110;
             }
             catch( Exception e )
             {
@@ -349,7 +353,7 @@ namespace CM3D2.HandmaidsTale.Plugin
         private void ReadPluginPreferences()
         {
             configLanguage = GetPreferences("Config", "Language", "English");
-            configEffectKey = GetPreferences("Config", "EffectWindowKey", "z");
+            configEffectKey = GetPreferences("Config", "EffectWindowKey", "m");
             configEnvironmentKey = GetPreferences("Config", "EnvironmentWindowKey", "x");
             configDataKey = GetPreferences("Config", "DataWindowKey", "c");
 
