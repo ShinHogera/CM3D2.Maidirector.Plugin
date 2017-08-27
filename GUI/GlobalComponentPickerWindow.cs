@@ -201,6 +201,10 @@ namespace CM3D2.HandmaidsTale.Plugin
                 {
                     func(new MovieMaidFaceTrack(this.selectedMaid));
                 }
+                else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
+                {
+                    func(new MovieMaidIKTrack(this.selectedMaid));
+                }
                 this.show = false;
             }
 
@@ -231,7 +235,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.componentBox.OnGUI();
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation ||
-                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace)
+                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace || 
+                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
                 {
                     this.maidBox.SetFromRect(rectItem);
                     this.maidBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
@@ -280,7 +285,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                 ObjectProperty,
                 CameraTarget,
                 MaidAnimation,
-                MaidFace
+                MaidFace,
+                MaidIK
             }
         }
     }

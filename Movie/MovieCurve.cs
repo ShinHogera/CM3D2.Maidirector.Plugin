@@ -28,7 +28,6 @@ public class MovieCurve
         this.curve = new AnimationCurve(new Keyframe[]
         {
             new Keyframe(0, value),
-            new Keyframe(.5f, value),
             new Keyframe(1, value),
         });
     }

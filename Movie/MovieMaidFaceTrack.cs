@@ -75,29 +75,29 @@ namespace CM3D2.HandmaidsTale.Plugin
             clip.AddCurve(new MovieCurve(clip.length, 0, faceVals[faceValIndex, 1]));
         }
 
-        private void AddCurveToAll(int faceValIndex)
-        {
-            foreach(MovieCurveClip clip in this.clips)
-            {
-                this.AddCurve(clip, faceValIndex);
-            }
-            this.curveIdxToFaceValIdx.Add(faceValIndex);
-        }
+        // private void AddCurveToAll(int faceValIndex)
+        // {
+        //     foreach(MovieCurveClip clip in this.clips)
+        //     {
+        //         this.AddCurve(clip, faceValIndex);
+        //     }
+        //     this.curveIdxToFaceValIdx.Add(faceValIndex);
+        // }
 
-        private void RemoveCurve(int curveIndex)
-        {
-            foreach(MovieCurveClip clip in this.clips)
-            {
-                clip.curves.RemoveAt(curveIndex);
-            }
-            this.curveIdxToFaceValIdx.RemoveAt(curveIndex);
-        }
+        // private void RemoveCurve(int curveIndex)
+        // {
+        //     foreach(MovieCurveClip clip in this.clips)
+        //     {
+        //         clip.curves.RemoveAt(curveIndex);
+        //     }
+        //     this.curveIdxToFaceValIdx.RemoveAt(curveIndex);
+        // }
 
         public override void AddClipInternal(MovieCurveClip clip)
         {
-            for(int i = 0; i < this.curveIdxToFaceValIdx.Count; i++)
+            for(int i = 0; i < faceVals.GetLength(0); i++)
             {
-                this.AddCurve(clip, this.curveIdxToFaceValIdx[i]);
+                this.AddCurve(clip, i);
             }
         }
 

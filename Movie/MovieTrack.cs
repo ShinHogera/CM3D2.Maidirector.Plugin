@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.Linq;
 
 namespace CM3D2.HandmaidsTale.Plugin
 {

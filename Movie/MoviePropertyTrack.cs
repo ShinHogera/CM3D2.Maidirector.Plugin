@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.Linq;
 
 namespace CM3D2.HandmaidsTale.Plugin
 {
@@ -13,6 +16,16 @@ namespace CM3D2.HandmaidsTale.Plugin
         Dictionary<int, List<int>> propIdxToCurveIdxes;
         public GameObject target;
         public Component component;
+
+        public string targetName;
+        public ObjectType targetType;
+
+        public enum ObjectType
+        {
+            Background,
+            Static,
+            Other
+        }
 
         public MoviePropertyTrack(GameObject go, Component c) : base()
         {
@@ -303,5 +316,34 @@ namespace CM3D2.HandmaidsTale.Plugin
                 return new float[] { 0 };
             }
         }
+
+        // public override XElement Save()
+        // {
+            
+        // }
+
+        // public override void Restore(XElement elem)
+        // {
+        //     ObjectType targetType = (ObjectType)Enum.Parse( typeof( ObjectType ), elem.Element("TargetType").Value.ToString());
+        //     string targetName = elem.Element("TargetName").Value.ToString();
+
+        //     GameObject target = null;
+        //     Component component = null;
+        //     switch(targetType)
+        //     {
+        //         case ObjectType.Background:
+        //             GameObject background = GameMain.Instance.BgMgr.current_bg_object;
+        //             target = background.transform.Find(targetName);
+        //             break;
+        //         case ObjectType.Static:
+        //         case ObjectType.Other:
+        //             // Assuming the object is always instantiated and global (camera, etc.)
+        //             target = UnityEngine.GameObject.Find(targetName);
+        //             break;
+        //     }
+
+        //     string componentTypeName = elem.Element("ComponentType").Value.ToString();
+        //     Type componentType = typeof(UnityEngine.GameObject).Assembly.GetType(componentTypeName);
+        // }
     }
 }

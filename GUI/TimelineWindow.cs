@@ -101,6 +101,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                 {
                     if(this.tracks[i].wantsDelete)
                     {
+                        // reset to the value at the beginning of the track, instead of in the middle
+                        this.tracks[i].PreviewTime(0f);
                         this.tracks.RemoveAt(i);
                     }
                 }
@@ -149,6 +151,12 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.dragMode = (DragMode)iTmp;
                 }
                 //this.Height = GUIUtil.GetHeightForParent(this) + 5 * this.ControlHeight;
+
+                toggleRect.x += toggleRect.width;
+                if ((iTmp = GUI.Toolbar(toggleRect, (int)this.curvePane.mode, CURVE_PANE_MODES)) >= 0)
+                {
+                    this.curvePane.mode = (CurvePane.CurvePaneMode)iTmp;
+                }
 
                 Rect curveRect = new Rect(0, toggleRect.yMax, 1000, 300);
                 this.curvePane.SetFromRect(curveRect);
@@ -319,6 +327,12 @@ namespace CM3D2.HandmaidsTale.Plugin
                 "]"
             };
 
+        private static readonly string[] CURVE_PANE_MODES = new string[]
+            {
+                "Curve",
+                "Key"
+            };
+
         private bool isPlaying;
 
         private float _playTime;
@@ -327,7 +341,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             get => _playTime;
             set
             {
-                _playTime = value;
+                _playTime = Mathf.Max(0, value);
                 this._seekerPos = _playTime * framesPerSecond * pixelsPerFrame;
                 this.updated = true;
             }
@@ -339,7 +353,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             get => _seekerPos;
             set
             {
-                _seekerPos = value;
+                _seekerPos = Mathf.Max(0, value);
                 this._playTime = _seekerPos / (framesPerSecond * pixelsPerFrame);
                 this.updated = true;
             }

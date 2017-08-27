@@ -8,6 +8,15 @@ using CM3D2.HandmaidsTale.Plugin;
 
 public class MovieCameraTargetTrack : MovieTrack
 {
+    private static readonly string[] NAMES = new string[] {
+        "Distance",
+        "Orbit X",
+        "Orbit Y",
+        "Pos X",
+        "Pos Y",
+        "Pos Z"
+    };
+
     public MovieCameraTargetTrack() : base() {}
 
     public override void AddClipInternal(MovieCurveClip clip)
@@ -23,23 +32,26 @@ public class MovieCameraTargetTrack : MovieTrack
         float[] values = GetValues();
         for (int j = 0; j < values.Length; j++)
         {
-            clip.AddCurve(new MovieCurve(clip.length, values[j], "Target Pos." + j));
+            clip.AddCurve(new MovieCurve(clip.length, values[j], NAMES[j]));
         }
     }
 
     private float[] GetValues()
     {
+        float dist = GameMain.Instance.MainCamera.GetDistance();
         Vector2 rot = GameMain.Instance.MainCamera.GetAroundAngle();
         Vector3 pos = GameMain.Instance.MainCamera.GetTargetPos();
-        return new float[] { rot[0], rot[1], pos[0], pos[1], pos[2] };
+        return new float[] { dist, rot[0], rot[1], pos[0], pos[1], pos[2] };
     }
 
     public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
     {
         float[] values = clip.curves.Select(c => c.Evaluate(sampleTime)).ToArray();
 
-        Vector2 rot = new Vector2(values[0], values[1]);
-        Vector3 pos = new Vector3(values[2], values[3], values[4]);
+        float dist = values[0];
+        Vector2 rot = new Vector2(values[1], values[2]);
+        Vector3 pos = new Vector3(values[3], values[4], values[5]);
+        GameMain.Instance.MainCamera.SetDistance(dist, true);
         GameMain.Instance.MainCamera.SetAroundAngle(rot, true);
         GameMain.Instance.MainCamera.SetTargetPos(pos, true);
     }
@@ -68,6 +80,7 @@ public class MovieCameraTargetTrack : MovieTrack
         rect.x = 25;
         if (GUI.Button(rect, "-"))
         {
+            this.Delete();
         }
     }
 }
