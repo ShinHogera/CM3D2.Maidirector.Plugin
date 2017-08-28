@@ -13,6 +13,8 @@ public class MovieCurve
         get => this.curve.keys;
     }
 
+    private List<int> tangentModes;
+
     private int length;
     public string name;
 
@@ -30,6 +32,10 @@ public class MovieCurve
             new Keyframe(0, value),
             new Keyframe(1, value),
         });
+
+        this.tangentModes = new List<int>();
+        this.tangentModes.Add(0);
+        this.tangentModes.Add(0);
     }
 
     public float maxValue
@@ -52,21 +58,25 @@ public class MovieCurve
         }
     }
 
+    public void SetTangentMode(int index, int tangentMode)
+    {
+        this.tangentModes[index] = tangentMode;
+    }
+
+    public int GetTangentMode(int index)
+    {
+        return this.tangentModes[index];
+    }
+
     public void AddKeyframe(Keyframe keyframe)
     {
         if(keyframe.time < 0f || keyframe.time > 1f)
         {
             Debug.LogWarning("Keyframe time invalid: " + keyframe.time);
-            return;
         }
 
-        this.curve.AddKey(keyframe);
-        this.SortKeyframes();
-    }
-
-    public void SortKeyframes()
-    {
-        //this.keyframes.Sort((a, b) => a.time.CompareTo(b.time));
+        int idx = this.curve.AddKey(keyframe);
+        this.tangentModes.Insert(idx, 0);
     }
 
     public float Evaluate(float time)
@@ -81,7 +91,14 @@ public class MovieCurve
     public void InsertKeyframeAtTime(float time)
     {
         float value = this.Evaluate(time);
-        this.AddKeyframe(new Keyframe(time, value, .5f, .5f));
+        Keyframe key = new Keyframe(time, value, .5f, .5f);
+        this.AddKeyframe(key);
+    }
+
+    public void RemoveKeyframe(int index)
+    {
+        this.curve.RemoveKey(index);
+        this.tangentModes.RemoveAt(index);
     }
 
     private int keyframeTimeToFrame(Keyframe keyframe) => (int)(keyframe.time * this.length);
