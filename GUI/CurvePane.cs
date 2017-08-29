@@ -169,14 +169,16 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public void SetUpdate() => this.needsUpdate = true;
 
-        public void UpdateFromClip(MovieCurveClip clip)
+        public void UpdateFromClip(MovieCurveClip clip, bool refit = false)
         {
             this.selectedKeyframeCurveIndex = 0;
             this.selectedKeyframeIndex = 0;
 
-            this.FitAllCurves(clip);
+            if(refit)
+            {
+                this.FitAllCurves(clip);
+            }
 
-            this.ZoomOut();
             this.RemakeTexture(ref clip);
 
             this.dragging = new bool[clip.curves.Count][];
@@ -257,7 +259,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         private void ZoomOut()
         {
-            this.scale *= 2;
+            this.scale *= 1.25f;
             this.needsUpdate = true;
         }
 
@@ -266,7 +268,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             if (this.scale <= 1)
                 return;
 
-            this.scale /= 2;
+            this.scale /= 1.25f;
             this.needsUpdate = true;
         }
 
@@ -289,9 +291,9 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         private void CenterBetween(float minVal, float maxVal)
         {
-            float diff = Mathf.Max(1, (maxVal - minVal));
-            this.scale = Mathf.Max(1, ((maxVal + .25f * diff) - (minVal - .25f * diff)));
-            this.pos = (minVal - .25f * diff) + (this.scale / 2);
+            this.scale = Mathf.Max(1, (maxVal - minVal));
+            this.pos = minVal + (this.scale / 2);
+            this.ZoomOut();
 
             this.needsUpdate = true;
         }
@@ -317,15 +319,31 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
 
             rectItem.x += rectItem.width;
-            if (GUI.Button(rectItem, "￪"))
+            if (GUI.Button(rectItem, "▲"))
             {
                 this.PanUp();
             }
 
             rectItem.x += rectItem.width;
-            if (GUI.Button(rectItem, "￬"))
+            if (GUI.Button(rectItem, "▼"))
             {
                 this.PanDown();
+            }
+
+            rectItem.x = 0;
+            rectItem.width = panelRect.width / 2;
+            rectItem.y += rectItem.height;
+
+            if(GUI.Button(rectItem, "Center"))
+            {
+                this.CenterSelectedCurve(clip);
+            }
+
+            rectItem.x += rectItem.width;
+
+            if(GUI.Button(rectItem, "Fit All"))
+            {
+                this.FitAllCurves(clip);
             }
 
             rectItem.width = panelRect.width;
@@ -376,7 +394,10 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             bool bTmp;
             bool val = TangentUtility.GetKeyBroken(clip.curves[selectedKeyframeCurveIndex], selectedKeyframeIndex);
+
+            // rectItem.width = panelRect.width / 2;
             rectItem.y += rectItem.height;
+
             bTmp = GUI.Toggle(rectItem, val, "Broken");
             if(bTmp != val)
             {
@@ -384,9 +405,16 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.needsUpdate = true;
             }
 
-            rectItem.y += rectItem.height;
-            rectItem.width = panelRect.width / 2;
+            // rectItem.x += rectItem.width;
+            // if (GUI.Button(rectItem, "Smooth"))
+            // {
+            //     clip.curves[selectedKeyframeCurveIndex].curve.SmoothTangents(selectedKeyframeIndex);
+            //     this.needsUpdate = true;
+            // }
 
+            // rectItem.x = 0;
+            rectItem.width = panelRect.width / 2;
+            rectItem.y += rectItem.height;
 
             GUIStyle style = new GUIStyle("button");
             using( GUIColor color = new GUIColor( this.isInserting ? Color.green : GUI.backgroundColor, GUI.contentColor ) )
@@ -406,22 +434,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                     clip.curves[selectedKeyframeCurveIndex].RemoveKeyframe(selectedKeyframeIndex);
                     this.UpdateFromClip(clip);
                 }
-            }
-
-            rectItem.width = panelRect.width / 2;
-            rectItem.y += rectItem.height;
-            rectItem.x = 0;
-
-            if(GUI.Button(rectItem, "Center"))
-            {
-                this.CenterSelectedCurve(clip);
-            }
-
-            rectItem.x += rectItem.width;
-
-            if(GUI.Button(rectItem, "Fit All"))
-            {
-                this.FitAllCurves(clip);
             }
 
             GUILayout.EndArea();
@@ -677,7 +689,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         private void RefreshSelectedClip(ref MovieCurveClip clip, int clipIndex, int trackIndex)
         {
-            this.UpdateFromClip(clip);
+            this.UpdateFromClip(clip, true);
             this.selectedClipIndex = clipIndex;
             this.selectedTrackIndex = trackIndex;
         }

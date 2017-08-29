@@ -55,32 +55,4 @@ public class MovieCameraTargetTrack : MovieTrack
         GameMain.Instance.MainCamera.SetAroundAngle(rot, true);
         GameMain.Instance.MainCamera.SetTargetPos(pos, true);
     }
-
-    public override void DrawPanel(float currentTime)
-    {
-        Rect rect = new Rect(0, 0, 25, 15);
-        if (GUI.Button(rect, "+"))
-        {
-
-        }
-
-        rect.x = 25;
-        if (GUI.Button(rect, "K"))
-        {
-            this.InsertKeyframeAtTime(currentTime);
-        }
-
-        rect.x = 0;
-        rect.y += rect.height;
-        if (GUI.Button(rect, "C"))
-        {
-            this.InsertNewClip();
-        }
-
-        rect.x = 25;
-        if (GUI.Button(rect, "-"))
-        {
-            this.Delete();
-        }
-    }
 }

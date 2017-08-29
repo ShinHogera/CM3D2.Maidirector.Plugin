@@ -51,6 +51,8 @@ public class MovieCurve
         }
 
         this.curve = new AnimationCurve(keyframes);
+        this.curve.preWrapMode = other.curve.preWrapMode;
+        this.curve.postWrapMode = other.curve.postWrapMode;
 
         this.tangentModes = new List<int>();
         foreach(int i in other.tangentModes)
@@ -192,5 +194,9 @@ public class MovieCurve
     {
         if(this.CanMoveKey(j, key))
             this.curve.MoveKey(j, key);
+        else
+        {
+        TODO: move to max/min possible val
+        }
     }
 }

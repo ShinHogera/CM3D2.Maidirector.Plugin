@@ -60,11 +60,13 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             private List<GameObject> gameObjects;
             private List<Component> components;
+            private List<string> animationNames;
 
             private CustomComboBox trackTypeBox;
             private CustomComboBox objectBox;
             private CustomComboBox componentBox;
             private CustomComboBox maidBox;
+            private CustomComboBox animationNameBox;
             private CustomButton okButton;
             private CustomButton cancelButton;
 
@@ -83,21 +85,28 @@ namespace CM3D2.HandmaidsTale.Plugin
                 get => GameMain.Instance.CharacterMgr.GetMaid(maidBox.SelectedIndex);
             }
 
+            private string selectedAnimationName
+            {
+                get => this.animationNames[animationNameBox.SelectedIndex];
+            }
+
             public ComponentWindow(int iWIndowID)
             {
                 WINDOW_ID = iWIndowID;
 
                 this.trackTypeBox = new CustomComboBox( Enum.GetNames(typeof(TrackType) ));
-                this.trackTypeBox.SelectedIndexChanged += this.SelectTrackType;
 
                 // Object property track
                 this.objectBox = new CustomComboBox();
                 this.objectBox.SelectedIndexChanged += this.SelectObject;
+
                 this.componentBox = new CustomComboBox();
-                this.componentBox.SelectedIndexChanged += this.SelectComponent;
 
                 // Maid track
                 this.maidBox = new CustomComboBox();
+
+                // Maid animation track
+                this.animationNameBox = new CustomComboBox();
 
                 this.okButton = new CustomButton();
                 this.okButton.Text = "OK";
@@ -129,6 +138,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 this.LoadObjects();
                 this.LoadMaids();
+                this.LoadAnimationNames();
             }
 
             private bool IsPermittedGameObject(GameObject go) => go.activeInHierarchy &&
@@ -160,12 +170,21 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.maidBox.SelectedIndex = 0;
             }
 
-            private static bool IsValidMaid(Maid maid) => maid != null && maid.body0.trsHead != null && maid.Visible;
-
-            private void SelectTrackType(object sender, EventArgs args)
+            private void LoadAnimationNames()
             {
+                if(PhotoMotionData.data == null)
+                    PhotoMotionData.Create();
 
+                var data = PhotoMotionData.data.Where(d => !d.is_mod &&
+                                                      !d.is_mypose &&
+                                                      !string.IsNullOrEmpty(d.direct_file));
+
+                this.animationNames = data.Select(d => d.direct_file).ToList();
+                this.animationNameBox.Items = data.Select(d => new GUIContent(d.name)).ToList();
+                this.animationNameBox.SelectedIndex = 0;
             }
+
+            private static bool IsValidMaid(Maid maid) => maid != null && maid.body0.trsHead != null && maid.Visible;
 
             private void SelectObject(object sender, EventArgs args)
             {
@@ -176,11 +195,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.components = this.gameObjects[index].GetComponents<Component>().ToList();
                 this.componentBox.Items = this.components.Select(co => new GUIContent(co.GetType().Name)).ToList();
                 this.componentBox.SelectedIndex = 0;
-            }
-
-            private void SelectComponent(object sender, EventArgs args)
-            {
-
             }
 
             private void Ok(object sender, EventArgs args)
@@ -195,7 +209,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation)
                 {
-                    func(new MovieMaidAnimationTrack(this.selectedMaid));
+                    func(new MovieMaidAnimationTrack(this.selectedMaid, this.selectedAnimationName));
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace)
                 {
@@ -235,12 +249,20 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.componentBox.OnGUI();
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation ||
-                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace || 
+                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace ||
                         this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
                 {
                     this.maidBox.SetFromRect(rectItem);
                     this.maidBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.maidBox.OnGUI();
+                }
+
+                if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation)
+                {
+                    rectItem.y += rectItem.height;
+                    this.animationNameBox.SetFromRect(rectItem);
+                    this.animationNameBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.animationNameBox.OnGUI();
                 }
 
                 rectItem.y += rectItem.height;

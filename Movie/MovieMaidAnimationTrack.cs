@@ -14,22 +14,24 @@ namespace CM3D2.HandmaidsTale.Plugin
         public Animation animationTarget;
         public string animationName;
 
-        public MovieMaidAnimationTrack(Maid maid) : base()
+        public MovieMaidAnimationTrack(Maid maid, string animationName) : base()
         {
             this.maid = maid;
             this.animationTarget = maid.body0.m_Bones.GetComponent<Animation>();
-            this.animationName = PhotoMotionData.data.Where(d => !d.is_mod &&
-                                                            !d.is_mypose &&
-                                                            !string.IsNullOrEmpty(d.direct_file))
-                .First().direct_file;
+            Debug.Log(animationName);
+            this.animationName = animationName;
             AnimationState animationState = maid.body0.LoadAnime(this.animationName.ToLower(), this.animationName, false, false);
-            Debug.Log(this.animationName + " Name");
         }
 
         public override void AddClipInternal(MovieCurveClip clip)
         {
+            clip.length = this.AnimationFrameLength();
             clip.AddCurve(new MovieCurve(clip.length, 0, "Length"));
         }
+
+        private float AnimationLength() => this.animationTarget[this.animationName].length;
+
+        private int AnimationFrameLength() => (int)(this.AnimationLength() * TimelineWindow.framesPerSecond);
 
         public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
         {
@@ -41,36 +43,6 @@ namespace CM3D2.HandmaidsTale.Plugin
             animationTarget[animationName.ToLower()].enabled = true;
             animationTarget.Sample();
             animationTarget[animationName.ToLower()].enabled = false;
-        }
-        public override void DrawPanel(float currentTime)
-        {
-            Rect rect = new Rect(0, 0, 25, 15);
-            if (GUI.Button(rect, "+"))
-            {
-                // GlobalPicker.Set(new Vector2(100, 100), 200, 12, new string[] { "dood" }, (s) =>
-                //         {
-
-                //         });
-            }
-
-            rect.x = 25;
-            if (GUI.Button(rect, "K"))
-            {
-                this.InsertKeyframeAtTime(currentTime);
-            }
-
-            rect.x = 0;
-            rect.y += rect.height;
-            if (GUI.Button(rect, "C"))
-            {
-                this.InsertNewClip();
-            }
-
-            rect.x = 25;
-            if (GUI.Button(rect, "-"))
-            {
-                this.Delete();
-            }
         }
     }
 }

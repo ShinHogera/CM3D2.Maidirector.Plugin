@@ -11,6 +11,7 @@ namespace CM3D2.HandmaidsTale.Plugin
     public abstract class MovieTrack {
         public List<MovieCurveClip> clips;
         public bool wantsDelete { get; private set; }
+        public bool enabled { get; set; } = true;
 
         public float endTime
         {
@@ -31,6 +32,9 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public void PreviewTime(float time)
         {
+            if(!this.enabled)
+                return;
+
             MovieCurveClip currentClip = this.GetClipForTime(time);
             float sampleTime;
             if (currentClip == null)
@@ -55,7 +59,47 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public abstract void PreviewTimeInternal(MovieCurveClip clip, float sampleTime);
         public abstract void AddClipInternal(MovieCurveClip clip);
-        public abstract void DrawPanel(float currentTime);
+
+        public virtual void DrawPanelExtra(float currentTime) {}
+        public virtual void DrawPanel(float currentTime)
+        {
+            Rect rect = new Rect(0, 0, 25, 15);
+            using( GUIColor color = new GUIColor( this.enabled ? Color.green : GUI.backgroundColor, GUI.contentColor ) )
+            {
+                bool bTmp;
+                bTmp = GUI.Toggle(rect, this.enabled, "E", new GUIStyle("button"));
+                if(bTmp != this.enabled)
+                {
+                    this.enabled = bTmp;
+                }
+            }
+
+            rect.x = 25;
+            if (GUI.Button(rect, "K"))
+            {
+                this.InsertKeyframeAtTime(currentTime);
+            }
+
+            rect.x = 0;
+            rect.y += rect.height;
+            if (GUI.Button(rect, "C"))
+            {
+                this.InsertNewClip();
+            }
+
+            rect.x = 25;
+            if (GUI.Button(rect, "-"))
+            {
+                this.Delete();
+            }
+            rect.x = 0;
+            rect.y += rect.height;
+            rect.width = rect.width * 2;
+
+            GUILayout.BeginArea(rect);
+            this.DrawPanelExtra(currentTime);
+            GUILayout.EndArea();
+        }
 
         public void Delete()
         {
