@@ -12,6 +12,18 @@ namespace CM3D2.HandmaidsTale.Plugin
         public List<MovieCurveClip> clips;
         public bool wantsDelete { get; private set; }
 
+        public float endTime
+        {
+            get
+            {
+                if(this.clips.Count == 0)
+                    return 300;
+
+                float maxEnd = this.clips.OrderByDescending(clip => clip.end).First().end;
+                return Mathf.Max(300, maxEnd);
+            }
+        }
+
         public MovieTrack()
         {
             this.clips = new List<MovieCurveClip>();
@@ -50,11 +62,19 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.wantsDelete = true;
         }
 
-        public void AddClip(MovieCurveClip clip)
+        public void ProcessAndAddClip(MovieCurveClip clip)
         {
             if(this.CanInsertClip(clip.frame, clip.length))
             {
                 this.AddClipInternal(clip);
+                this.clips.Add(clip);
+            }
+        }
+
+        public void AddClip(MovieCurveClip clip)
+        {
+            if(this.CanInsertClip(clip.frame, clip.length))
+            {
                 this.clips.Add(clip);
             }
         }
@@ -142,10 +162,36 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
-        public void InsertClipAtFreePos()
+        public void InsertNewClip()
         {
-            int nextOpenFrame = this.NextOpenFrame(60);
-            this.AddClip(new MovieCurveClip(nextOpenFrame, 60));
+            this.InsertClipAtFreePos(new MovieCurveClip(0, 300), true);
+        }
+
+        public void InsertClipAtFreePos(MovieCurveClip clip, bool process)
+        {
+            int nextOpenFrame = this.NextOpenFrame(clip.length);
+            clip.frame = nextOpenFrame;
+
+            if(process)
+                this.ProcessAndAddClip(clip);
+            else
+                this.AddClip(clip);
+        }
+
+        public void CopyClip(int index)
+        {
+            if(index < 0 || index >= this.clips.Count)
+                return;
+            MovieCurveClip toCopy = this.clips[index];
+            this.InsertClipAtFreePos(new MovieCurveClip(toCopy), false);
+        }
+
+        public void DeleteClip(int index)
+        {
+            if(index < 0 || index >= this.clips.Count)
+                return;
+
+            this.clips.RemoveAt(index);
         }
     }
 }

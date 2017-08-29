@@ -317,13 +317,13 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
 
             rectItem.x += rectItem.width;
-            if (GUI.Button(rectItem, "^"))
+            if (GUI.Button(rectItem, "￪"))
             {
                 this.PanUp();
             }
 
             rectItem.x += rectItem.width;
-            if (GUI.Button(rectItem, "v"))
+            if (GUI.Button(rectItem, "￬"))
             {
                 this.PanDown();
             }
@@ -494,7 +494,9 @@ namespace CM3D2.HandmaidsTale.Plugin
                     }
 
                     this.keyframeUpdated = false;
-                    if (j != clip.curves[i].keyframes.Length - 1)
+                    if (i == selectedKeyframeCurveIndex &&
+                        j == selectedKeyframeIndex &&
+                        j != clip.curves[i].keyframes.Length - 1)
                     {
                         Keyframe key1 = clip.curves[i].keyframes[j];
                         Keyframe key2 = clip.curves[i].keyframes[j + 1];

@@ -24,6 +24,10 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.dragging = new List<bool>();
             this.dragMode = DragMode.Drag;
 
+            this.lineTexture = new Texture2D(1, 1);
+            this.lineTexture.SetPixel(0, 0, Color.white);
+            this.lineTexture.Apply();
+
             //for (int i = 0; i < 15; i++)
             //{
             //    GameObject go = GameObject.Find("Main Camera");
@@ -41,16 +45,13 @@ namespace CM3D2.HandmaidsTale.Plugin
         {
             try
             {
-                this.showButton = new Plugin.CustomButton();
-                this.ChildControls.Add(this.showButton);
-
                 this.playButton = new Plugin.CustomButton();
-                this.playButton.Text = "|>";
+                this.playButton.Text = "▶";
                 this.playButton.Click += this.Play;
                 this.ChildControls.Add(this.playButton);
 
                 this.stopButton = new Plugin.CustomButton();
-                this.stopButton.Text = "X";
+                this.stopButton.Text = "■";
                 this.stopButton.Click += this.Stop;
                 this.ChildControls.Add(this.stopButton);
 
@@ -58,6 +59,16 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.addButton.Text = "+";
                 this.addButton.Click += this.Add;
                 this.ChildControls.Add(this.addButton);
+
+                this.copyClipButton = new Plugin.CustomButton();
+                this.copyClipButton.Text = "Copy Clip";
+                this.copyClipButton.Click += this.CopyClip;
+                this.ChildControls.Add(this.copyClipButton);
+
+                this.deleteClipButton = new Plugin.CustomButton();
+                this.deleteClipButton.Text = "Delete Clip";
+                this.deleteClipButton.Click += this.DeleteClip;
+                this.ChildControls.Add(this.deleteClipButton);
 
                 this.curvePane = new CurvePane();
                 this.ChildControls.Add(this.curvePane);
@@ -87,11 +98,28 @@ namespace CM3D2.HandmaidsTale.Plugin
                     draggingSeeker = false;
                 }
 
-                Rect lineRect = new Rect(ControlBase.FixedMargin + (this.seekerPos + 50), 0, 20, 400);
+                Rect lineRect = new Rect(ControlBase.FixedMargin + (this.seekerPos + 50), 0, 1, 400);
 
-                GUI.Label(lineRect, "|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n|\n");
+                GUI.DrawTexture(lineRect, this.lineTexture);
 
-                Rect rectScroll = new Rect(0, ControlBase.FixedMargin + 20, this.rectGui.width - ControlBase.FixedMargin, 400 - ControlBase.FixedMargin * 4);
+                Rect trackPanelRect = new Rect(0, ControlBase.FixedMargin + 20, 50, 400 - ControlBase.FixedMargin * 4);
+
+                GUILayout.BeginArea(trackPanelRect);
+                for(int i = 0; i < this.tracks.Count; i++)
+                {
+                    MovieTrack track = this.tracks[i];
+                    Rect panel = new Rect(0,
+                                          this.scrollPosition.y + (this.ControlHeight * 2 * i),
+                                          50,
+                                          this.ControlHeight * 2);
+
+                    GUILayout.BeginArea(panel);
+                    track.DrawPanel(this.currentFrame / framesPerSecond);
+                    GUILayout.EndArea();
+                }
+                GUILayout.EndArea();
+
+                Rect rectScroll = new Rect(50, ControlBase.FixedMargin + 20, this.rectGui.width - ControlBase.FixedMargin - 50, 400 - ControlBase.FixedMargin * 4);
                 Rect rectScrollView = new Rect(0, 0, guiScrollWidth, guiScrollHeight);
 
                 this.scrollPosition = GUI.BeginScrollView(rectScroll, this.scrollPosition, rectScrollView);
@@ -112,19 +140,11 @@ namespace CM3D2.HandmaidsTale.Plugin
                 }
 
                 guiScrollHeight = (this.tracks.Count) * this.ControlHeight * 2;
-                guiScrollWidth = 2000;
                 GUI.EndScrollView();
 
-                this.showButton.Left = this.Left + ControlBase.FixedMargin;
-                this.showButton.Top = rectScroll.yMax + ControlBase.FixedMargin;
-                this.showButton.Width = 100;
-                this.showButton.Height = this.ControlHeight;
-                this.showButton.Visible = true;
-                this.showButton.OnGUI();
-
-                this.playButton.Left = this.showButton.Left + this.showButton.Width;
-                this.playButton.Top = this.showButton.Top;
-                this.playButton.Width = this.showButton.Width;
+                this.playButton.Left = this.Left + ControlBase.FixedMargin;
+                this.playButton.Top = rectScroll.yMax + ControlBase.FixedMargin;
+                this.playButton.Width = 100;
                 this.playButton.Height = this.ControlHeight;
                 this.playButton.Visible = true;
                 this.playButton.OnGUI();
@@ -143,8 +163,22 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.addButton.Visible = true;
                 this.addButton.OnGUI();
 
-                Rect toggleRect = this.addButton.WindowRect;
-                toggleRect.x += toggleRect.width;
+                this.copyClipButton.Left = this.addButton.Left + this.addButton.Width;
+                this.copyClipButton.Top = this.addButton.Top;
+                this.copyClipButton.Width = this.addButton.Width;
+                this.copyClipButton.Height = this.ControlHeight;
+                this.copyClipButton.Visible = true;
+                this.copyClipButton.OnGUI();
+
+                this.deleteClipButton.Left = this.copyClipButton.Left + this.copyClipButton.Width;
+                this.deleteClipButton.Top = this.copyClipButton.Top;
+                this.deleteClipButton.Width = this.copyClipButton.Width;
+                this.deleteClipButton.Height = this.ControlHeight;
+                this.deleteClipButton.Visible = true;
+                this.deleteClipButton.OnGUI();
+
+                Rect toggleRect = this.deleteClipButton.WindowRect;
+                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
                 int iTmp;
                 if ((iTmp = GUI.Toolbar(toggleRect, (int)this.dragMode, DRAG_MODES)) >= 0)
                 {
@@ -152,20 +186,22 @@ namespace CM3D2.HandmaidsTale.Plugin
                 }
                 //this.Height = GUIUtil.GetHeightForParent(this) + 5 * this.ControlHeight;
 
-                toggleRect.x += toggleRect.width;
+                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
                 if ((iTmp = GUI.Toolbar(toggleRect, (int)this.curvePane.mode, CURVE_PANE_MODES)) >= 0)
                 {
                     this.curvePane.mode = (CurvePane.CurvePaneMode)iTmp;
                 }
 
+                // toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
+                // string sTmp =
+                // toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
+
                 Rect curveRect = new Rect(0, toggleRect.yMax, 1000, 300);
                 this.curvePane.SetFromRect(curveRect);
 
                 GUI.BeginGroup(curveRect);
-                if (this.tracks.Count > 0 &&
-                    this.selectedTrack < this.tracks.Count &&
-                    this.selectedClip < this.tracks[this.selectedTrack].clips.Count)
-                    this.curvePane.Draw(curveRect, this.tracks[this.selectedTrack].clips, this.selectedClip, this.selectedTrack);
+                if (this.ClipIsSelected())
+                    this.curvePane.Draw(curveRect, this.tracks[this.selectedTrackIndex].clips, this.selectedClipIndex, this.selectedTrackIndex);
                 GUI.EndGroup();
                 if (this.curvePane.needsUpdate)
                 {
@@ -176,6 +212,13 @@ namespace CM3D2.HandmaidsTale.Plugin
             {
                 Debug.LogError(e);
             }
+        }
+
+        private bool ClipIsSelected()
+        {
+            return this.tracks.Count > 0 &&
+                this.selectedTrackIndex < this.tracks.Count &&
+                this.selectedClipIndex < this.tracks[this.selectedTrackIndex].clips.Count;
         }
 
         public override void Update()
@@ -197,6 +240,11 @@ namespace CM3D2.HandmaidsTale.Plugin
                     {
                         track.PreviewTime(this.currentFrame / framesPerSecond);
                     }
+
+                    if(this.tracks.Count == 0)
+                        this.guiScrollWidth = 300;
+                    else
+                        this.guiScrollWidth = this.tracks.OrderByDescending(track => track.endTime).First().endTime + 300;
                 }
             }
         }
@@ -219,22 +267,32 @@ namespace CM3D2.HandmaidsTale.Plugin
         {
             GlobalComponentPicker.Set(new Vector2(100, 100), 200, this.FontSize, (existing) =>
                     {
-                        existing.InsertClipAtFreePos();
+                        existing.InsertNewClip();
                         this.tracks.Add(existing);
                         this.curvePane.SetUpdate();
                     });
         }
 
+        private void CopyClip(object sender, EventArgs args)
+        {
+            if(!this.ClipIsSelected())
+                return;
+
+            this.tracks[this.selectedTrackIndex].CopyClip(this.selectedClipIndex);
+        }
+
+        private void DeleteClip(object sender, EventArgs args)
+        {
+            if(!this.ClipIsSelected())
+                return;
+
+            this.tracks[this.selectedTrackIndex].DeleteClip(this.selectedClipIndex);
+        }
+
         private void drawTrack(int index)
         {
-            Rect rect = new Rect(0, (index) * this.ControlHeight * 2, 50, this.ControlHeight * 2);
+            Rect rect = new Rect(0, (index) * this.ControlHeight * 2, this.guiScrollWidth, this.ControlHeight * 2);
 
-            GUILayout.BeginArea(rect);
-            this.tracks[index].DrawPanel(this.currentFrame / framesPerSecond);
-            GUILayout.EndArea();
-
-            rect.x = 50;
-            rect.width = this.Width;
             GUI.Box(rect, "");
             GUILayout.BeginArea(rect);
             for (int i = 0; i < this.tracks[index].clips.Count; i++)
@@ -252,14 +310,16 @@ namespace CM3D2.HandmaidsTale.Plugin
                                  (clip.length * pixelsPerFrame),
                                  this.ControlHeight * 2);
 
-            int pixelDiffToFramePos = (int)((Input.mousePosition.x - this.ScreenPos.x) / pixelsPerFrame) - 50;
+            int pixelDiffToFramePos = (int)((Input.mousePosition.x - this.ScreenPos.x + this.scrollPosition.x - 50) / pixelsPerFrame);
+
+            GUI.Box(new Rect(pixelDiffToFramePos * pixelsPerFrame, 20, 40, 40), "");
 
             clip.Draw(rect, this.ScreenPos);
 
             if(clip.wasPressed)
             {
-                this.selectedTrack = trackIdx;
-                this.selectedClip = clipIdx;
+                this.selectedTrackIndex = trackIdx;
+                this.selectedClipIndex = clipIdx;
             }
 
             if (clip.isDragging)
@@ -267,7 +327,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 switch(this.dragMode)
                 {
                     case DragMode.Drag:
-                        int newFrame = pixelDiffToFramePos - (int)((clip.length / 4 * pixelsPerFrame));
+                        int newFrame = pixelDiffToFramePos - (clip.length / 2);
                         if (track.CanInsertClip(newFrame, clip.length, clip))
                             clip.frame = newFrame;
                         else if(newFrame <= 0)
@@ -275,7 +335,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                         break;
 
                     case DragMode.RightResize:
-                        int newEnd = pixelDiffToFramePos + 15;
+                        int newEnd = pixelDiffToFramePos + (clip.length / 10);
                         if (track.CanInsertClip(clip.frame, newEnd - clip.length))
                             clip.end = newEnd;
                         break;
@@ -322,9 +382,9 @@ namespace CM3D2.HandmaidsTale.Plugin
         #region Fields
         private static readonly string[] DRAG_MODES = new string[]
             {
-                "[",
+                // "[",
                 "Drag",
-                "]"
+                "Resize"
             };
 
         private static readonly string[] CURVE_PANE_MODES = new string[]
@@ -359,11 +419,14 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
-        private CustomButton showButton = null;
         private CustomButton playButton = null;
         private CustomButton stopButton = null;
         private CustomButton addButton = null;
+        private CustomButton copyClipButton = null;
+        private CustomButton deleteClipButton = null;
         private CurvePane curvePane;
+
+        private Texture2D lineTexture = null;
 
         private List<MovieTrack> tracks;
         private List<bool> dragging;
@@ -373,13 +436,13 @@ namespace CM3D2.HandmaidsTale.Plugin
         private Vector2 scrollPosition;
         private float guiScrollWidth;
         private float guiScrollHeight;
-        private int selectedTrack;
-        private int selectedClip;
+        private int selectedTrackIndex;
+        private int selectedClipIndex;
         #endregion
 
         private enum DragMode
         {
-            LeftResize,
+            // LeftResize,
             Drag,
             RightResize,
         }

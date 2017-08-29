@@ -74,7 +74,7 @@ public class MovieCameraTargetTrack : MovieTrack
         rect.y += rect.height;
         if (GUI.Button(rect, "C"))
         {
-            this.InsertClipAtFreePos();
+            this.InsertNewClip();
         }
 
         rect.x = 25;

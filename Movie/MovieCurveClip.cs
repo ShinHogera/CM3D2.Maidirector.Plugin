@@ -76,6 +76,20 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.heldFrames = 0;
         }
 
+        public MovieCurveClip(MovieCurveClip other)
+        {
+            this.curves = new List<MovieCurve>();
+            foreach(MovieCurve curve in other.curves)
+            {
+                this.curves.Add(new MovieCurve(curve));
+            }
+
+            this.frame = other.frame;
+            this.length = other.length;
+
+            this.RemakeTexture();
+        }
+
         public int AddCurve(MovieCurve curve)
         {
             this.curves.Add(curve);

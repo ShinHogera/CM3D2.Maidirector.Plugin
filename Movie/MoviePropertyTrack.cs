@@ -143,7 +143,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             rect.y += rect.height;
             if (GUI.Button(rect, "C"))
             {
-                this.InsertClipAtFreePos();
+                this.InsertNewClip();
             }
 
             rect.x = 25;

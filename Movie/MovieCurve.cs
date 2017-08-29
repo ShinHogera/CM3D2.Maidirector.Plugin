@@ -38,6 +38,27 @@ public class MovieCurve
         this.tangentModes.Add(0);
     }
 
+    public MovieCurve(MovieCurve other)
+    {
+        this.length = other.length;
+        this.name = other.name;
+
+        Keyframe[] keyframes = new Keyframe[other.keyframes.Length];
+        for(int i = 0; i < keyframes.Length; i++)
+        {
+            Keyframe key = other.keyframes[i];
+            keyframes[i] = new Keyframe(key.time, key.value, key.inTangent, key.outTangent);
+        }
+
+        this.curve = new AnimationCurve(keyframes);
+
+        this.tangentModes = new List<int>();
+        foreach(int i in other.tangentModes)
+        {
+            this.tangentModes.Add(i);
+        }
+    }
+
     public float maxValue
     {
         get
