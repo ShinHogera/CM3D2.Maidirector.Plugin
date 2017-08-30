@@ -11,4 +11,160 @@
           <deleteClip>Delete Clip</deleteClip>
       </Timeline>
       <CurvePane>
-          <center>C
+          <center>Center Curve</center>
+          <fitAll>Fit All</fitAll>
+          <insertKeyframe>Insert Key</insertKeyframe>
+          <deleteKeyframe>Delete Key</deleteKeyframe>
+          <leftTangentMode>Left Tangent Mode</leftTangentMode>
+          <rightTangentMode>Right Tangent Mode</rightTangentMode>
+          <keyframeBroken>Broken</keyframeBroken>
+          <wrapBefore>Wrap Before</wrapBefore>
+          <wrapAfter>Wrap After</wrapAfter>
+          <selectedCurve>Curve</selectedCurve>
+          <allOn>All On</allOn>
+          <allOff>All Off</allOff>
+          <time>Time</time>
+          <value>Value</value>
+      </CurvePane>
+      <ComponentPicker>
+          <trackType>Type</trackType>
+          <objectCategory>Category</objectCategory>
+          <object>Object</object>
+          <component>Component</component>
+          <maid>Maid</maid>
+          <animationName>Animation</animationName>
+      </ComponentPicker>
+      <PropertyPicker>
+          <field>Field</field>
+          <property>Property</property>
+          <isField>Is Field</isField>
+      </PropertyPicker>
+      <Enum>
+          <CameraTarget>Camera</CameraTarget>
+          <ObjectProperty>Object</ObjectProperty>
+          <MaidAnimation>Maid Animation</MaidAnimation>
+          <MaidFace>Maid Face</MaidFace>
+
+          <Camera>Camera</Camera>
+          <Background>Background</Background>
+          <All>All</All>
+
+          <Curve>Curve</Curve>
+          <Keyframe>Keyframe</Keyframe>
+          <Detail>Detail</Detail>
+          <ToggleVisible>Toggle Visible</ToggleVisible>
+
+          <Free>Free</Free>
+          <Auto>Auto</Auto>
+          <Linear>Linear</Linear>
+          <Constant>Constant</Constant>
+
+          <Default>Default</Default>
+          <Clamp>Clamp</Clamp>
+          <Once>Once</Once>
+          <Loop>Loop</Loop>
+          <PingPong>Ping Pong</PingPong>
+          <ClampForever>Clamp Forever</ClampForever>
+      </Enum>
+      <UI>
+          <language>Language</language>
+          <ok>OK</ok>
+          <cancel>Cancel</cancel>
+          <camera>Camera</camera>
+          <posX>Position X</posX>
+          <posY>Position Y</posY>
+          <posZ>Position Z</posZ>
+          <orbitX>Orbit X</orbitX>
+          <orbitY>Orbit Y</orbitY>
+          <rotZ>Rotation Z</rotZ>
+          <distance>Distance</distance>
+          <fieldOfView>Field Of View</fieldOfView>
+          <animation>Anim.</animation>
+          <face>Face</face>
+      </UI>
+  </Translation>
+  <Translation language="日本語">
+      <Timeline>
+          <drag>ドラッグ</drag>
+          <resize>リサイズ</resize>
+          <curve>カーブ</curve>
+          <keyframe>キーフレーム</keyframe>
+          <frame>フレーム</frame>
+          <addTrack>トラック追加</addTrack>
+          <copyClip>クリップ複製</copyClip>
+          <deleteClip>クリップ削除</deleteClip>
+      </Timeline>
+      <CurvePane>
+          <center>カーブを合わせる</center>
+          <fitAll>全部合わせる</fitAll>
+          <insertKeyframe>キーフレーム挿入</insertKeyframe>
+          <deleteKeyframe>キーフレーム削除</deleteKeyframe>
+          <leftTangentMode>接線モード（左</leftTangentMode>
+          <rightTangentMode>接線モード（右</rightTangentMode>
+          <keyframeBroken>キーフレーム分割</keyframeBroken>
+          <wrapBefore>折り返し（前</wrapBefore>
+          <wrapAfter>折り返し（後</wrapAfter>
+          <selectedCurve>カーブ</selectedCurve>
+          <allOn>全部表示</allOn>
+          <allOff>全部非表示</allOff>
+          <time>時間</time>
+          <value>値</value>
+      </CurvePane>
+      <ComponentPicker>
+          <trackType>種類</trackType>
+          <objectCategory>カテゴリー</objectCategory>
+          <object>オブジェクト</object>
+          <component>コンポーネント</component>
+          <maid>メイド</maid>
+          <animationName>モーション</animationName>
+      </ComponentPicker>
+      <PropertyPicker>
+          <field>フィールド</field>
+          <property>プロパティー</property>
+          <isField>フィールドの選択</isField>
+      </PropertyPicker>
+      <Enum>
+          <CameraTarget>カメラ</CameraTarget>
+          <ObjectProperty>オブジェクト</ObjectProperty>
+          <MaidAnimation>メイドモーション</MaidAnimation>
+          <MaidFace>メイド顔</MaidFace>
+
+          <Camera>カメラ</Camera>
+          <Background>背景</Background>
+          <All>全部</All>
+
+          <Curve>カーブ</Curve>
+          <Keyframe>キーフレーム</Keyframe>
+          <Detail>詳細</Detail>
+          <ToggleVisible>表示・非表示</ToggleVisible>
+
+          <Free>フリー</Free>
+          <Auto>オート</Auto>
+          <Linear>リニア</Linear>
+          <Constant>一定</Constant>
+
+          <Default>デフォルト</Default>
+          <Clamp>クランプ</Clamp>
+          <Once>一度</Once>
+          <Loop>ループ</Loop>
+          <PingPong>ピンポン</PingPong>
+          <ClampForever>永遠クランプ</ClampForever>
+      </Enum>
+      <UI>
+          <language>言語</language>
+          <ok>OK</ok>
+          <cancel>キャンセル</cancel>
+          <camera>カメラ</camera>
+          <posX>位置Ｘ</posX>
+          <posY>位置Ｙ</posY>
+          <posZ>位置Ｚ</posZ>
+          <orbitX>軌道Ｘ</orbitX>
+          <orbitY>軌道Ｙ</orbitY>
+          <rotZ>回転Ｚ</rotZ>
+          <distance>距離</distance>
+          <fieldOfView>視野</fieldOfView>
+          <animation>モーション</animation>
+          <face>顔</face>
+      </UI>
+  </Translation>
+</Translations>

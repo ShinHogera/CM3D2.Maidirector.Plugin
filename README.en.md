@@ -14,7 +14,7 @@ Place `Assembly-CSharp.dll`, `UnityEngine.dll`, `ExIni.dll`, and `UnityInjector.
 Photo mode is recommended.
 
 ### Timeline View
-Open the timeline window and press `Add Track` to create a track. The following track types are available:
+Open the timeline window and press **Add Track** to create a track. The following track types are available:
 - **Camera**: Control the camera.
 - **Object**: Control the properties of any object in the scene.
 - **Maid Animation**: Play an animation on a maid. The animation speed can be changed by changing the size of the curve clip.
@@ -29,7 +29,7 @@ These are the actions you can take using the buttons next to each track:
 
 Select a clip by clicking on it or dragging it and it will be displayed in the curve view.
 
-To resize tracks, press the `Resize` toggle and drag the clip you want to resize. To go back to dragging, press the `Drag` toggle.
+To resize tracks, press the **Resize** toggle and drag the clip you want to resize. To go back to dragging, press the **Drag** toggle.
 
 ### Curve View
 Here you can manipulate keyframes bound to the parameters of the selected clip by dragging the keyframe handles. Explanations of the other controls:
@@ -48,7 +48,7 @@ Here you can manipulate keyframes bound to the parameters of the selected clip b
 The panel for toggling visibility of keyframes can be accessed with the **Toggle Visible** button. This is useful for accessing a specific curve when keyframes from other curves overlap.
 
 ### Keyframe View
-Toggle the keyframe view by pressing the `Keyframe` button. This provides a top-down overview of all keyframes, similar to MikuMikuDance. Using this view, more precise values for keyframes can be input.
+Toggle the keyframe view by pressing the **Keyframe** button. This provides a top-down overview of all keyframes, similar to MikuMikuDance. Using this view, more precise values for keyframes can be input.
 
 ### Keybindings
 These are the default keybindings, but they can be edited in the `UnityInjector/Config/Maidirector.ini` config file.
