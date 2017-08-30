@@ -81,6 +81,19 @@ namespace CM3D2.Maidirector.Plugin
                         }
                     }
 
+                    if(this.timelineWindow != null && this.timelineWindow.wantsLanguageChange)
+                    {
+                        string lang = this.timelineWindow.LanguageValue;
+                        if(Translation.HasTranslation(lang))
+                        {
+                            Preferences["Config"]["Language"].Value = timelineWindow.LanguageValue;
+                            configLanguage = timelineWindow.LanguageValue;
+                            SaveConfig();
+
+                            this.timelineWindow.wantsLanguageChange = false;
+                        }
+                    }
+
                     if( Input.GetKeyDown( configWindowKey ) )
                     {
                         if( this.selectedMode == ConstantValues.EditMode.Movie )

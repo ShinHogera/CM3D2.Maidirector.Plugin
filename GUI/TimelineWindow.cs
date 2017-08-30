@@ -45,6 +45,12 @@ namespace CM3D2.Maidirector.Plugin
         {
             try
             {
+                this.languageBox = new CustomComboBox( Translation.GetTranslations() );
+                this.languageBox.Text = Translation.GetText("UI", "language");
+                this.languageBox.SelectedItem = Translation.CurrentTranslation;
+                this.languageBox.SelectedIndexChanged += this.ChangeLanguage;
+                this.ChildControls.Add( this.languageBox );
+
                 this.playButton = new Plugin.CustomButton();
                 this.playButton.Text = "▶";
                 this.playButton.Click += this.Play;
@@ -158,7 +164,7 @@ namespace CM3D2.Maidirector.Plugin
 
                 this.playButton.Left = this.Left + ControlBase.FixedMargin;
                 this.playButton.Top = rectScroll.yMax + ControlBase.FixedMargin;
-                this.playButton.Width = 100;
+                this.playButton.Width = 50;
                 this.playButton.Height = this.ControlHeight;
                 this.playButton.Visible = true;
                 this.playButton.OnGUI();
@@ -172,7 +178,7 @@ namespace CM3D2.Maidirector.Plugin
 
                 this.addButton.Left = this.stopButton.Left + this.stopButton.Width;
                 this.addButton.Top = this.stopButton.Top;
-                this.addButton.Width = this.stopButton.Width;
+                this.addButton.Width = 100;
                 this.addButton.Height = this.ControlHeight;
                 this.addButton.Visible = true;
                 this.addButton.OnGUI();
@@ -192,7 +198,7 @@ namespace CM3D2.Maidirector.Plugin
                 this.deleteClipButton.OnGUI();
 
                 Rect toggleRect = this.deleteClipButton.WindowRect;
-                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
+                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 2;
                 toggleRect.width *= 1.5f;
                 int iTmp;
                 if ((iTmp = GUI.Toolbar(toggleRect, (int)this.dragMode, DRAG_MODES)) >= 0)
@@ -201,11 +207,16 @@ namespace CM3D2.Maidirector.Plugin
                 }
                 //this.Height = GUIUtil.GetHeightForParent(this) + 5 * this.ControlHeight;
 
-                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
+                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 2;
+                toggleRect.width *= 1.25f;
                 if ((iTmp = GUI.Toolbar(toggleRect, (int)this.curvePane.mode, CURVE_PANE_MODES)) >= 0)
                 {
                     this.curvePane.mode = (CurvePane.CurvePaneMode)iTmp;
                 }
+
+                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 2;
+                this.languageBox.SetFromRect(toggleRect);
+                this.languageBox.OnGUI();
 
                 // toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
                 // string sTmp =
@@ -413,6 +424,11 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
+        private void ChangeLanguage( object sender, EventArgs args )
+        {
+            this.wantsLanguageChange = true;
+        }
+
         private int currentFrame
         {
             get =>(int)(this.seekerPos * posAdjustment);
@@ -438,6 +454,11 @@ namespace CM3D2.Maidirector.Plugin
         public static float framesPerSecond
         {
             get => 1 / FACTOR;
+        }
+
+        public string LanguageValue
+        {
+            get => this.languageBox.SelectedItem;
         }
 
         #region Fields
@@ -479,11 +500,14 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
+        public bool wantsLanguageChange { get; set; }
+
         private CustomButton playButton = null;
         private CustomButton stopButton = null;
         private CustomButton addButton = null;
         private CustomButton copyClipButton = null;
         private CustomButton deleteClipButton = null;
+        private CustomComboBox languageBox = null;
         private CurvePane curvePane;
 
         private Texture2D lineTexture = null;

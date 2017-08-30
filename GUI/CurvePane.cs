@@ -33,8 +33,10 @@ namespace CM3D2.Maidirector.Plugin
         private GUIStyle gsText;
 
         private Vector2 keyframeScrollPosition;
+        private Vector2 toggleVisibleScrollPosition;
         private float keyframeScrollWidth;
         private float keyframeScrollHeight;
+        private float toggleVisibleScrollHeight;
 
         public CurvePaneMode mode { get; set; }
 
@@ -389,7 +391,7 @@ namespace CM3D2.Maidirector.Plugin
 
             rectItem.x = 0;
             rectItem.y += rectItem.height;
-            rectItem.width = panelRect.width / 2;
+            rectItem.width = panelRect.width / 4 * 3;
 
             using( GUIColor color = new GUIColor( GUI.backgroundColor, CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) ) )
             {
@@ -397,8 +399,8 @@ namespace CM3D2.Maidirector.Plugin
             }
 
             rectItem.x += rectItem.width;
-            rectItem.width = panelRect.width / 4;
-            if(GUI.Button(rectItem, "<"))
+            rectItem.width = panelRect.width / 8;
+            if(GUI.Button(rectItem, "◀"))
             {
                 if(this.selectedKeyframeCurveIndex == 0)
                     this.selectedKeyframeCurveIndex = clip.curves.Count - 1;
@@ -409,7 +411,7 @@ namespace CM3D2.Maidirector.Plugin
             }
 
             rectItem.x += rectItem.width;
-            if(GUI.Button(rectItem, ">"))
+            if(GUI.Button(rectItem, "▶"))
             {
                 if(this.selectedKeyframeCurveIndex == clip.curves.Count - 1)
                     this.selectedKeyframeCurveIndex = 0;
@@ -531,6 +533,13 @@ namespace CM3D2.Maidirector.Plugin
             rectItem.x = 0;
             rectItem.width = panelRect.width;
             rectItem.y += rectItem.height;
+            rectItem.height = panelRect.height - rectItem.y;
+
+            Rect outerRect = new Rect(rectItem.x, rectItem.y, rectItem.width, rectItem.height);
+
+            this.toggleVisibleScrollPosition = GUI.BeginScrollView(outerRect, this.toggleVisibleScrollPosition, new Rect(0, 0, panelRect.width - 20, this.toggleVisibleScrollHeight));
+            rectItem.y = 0;
+            rectItem.height = 20;
 
             GUIStyle style = new GUIStyle("toggle");
             for(int i = 0; i < clip.curves.Count; i++)
@@ -546,6 +555,9 @@ namespace CM3D2.Maidirector.Plugin
                 }
                 rectItem.y += rectItem.height;
             }
+            this.toggleVisibleScrollHeight = rectItem.y;
+            GUI.EndScrollView();
+
             GUI.EndGroup();
         }
 
