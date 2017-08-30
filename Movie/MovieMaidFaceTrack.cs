@@ -70,6 +70,8 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.curveIdxToFaceValIdx = new List<int>();
         }
 
+        public override string GetName() => $"Face: {this.maid.name}";
+
         private void AddCurve(MovieCurveClip clip, int faceValIndex)
         {
             clip.AddCurve(new MovieCurve(clip.length, 0, faceVals[faceValIndex, 1]));
@@ -99,6 +101,20 @@ namespace CM3D2.HandmaidsTale.Plugin
             {
                 this.AddCurve(clip, i);
             }
+        }
+
+        public override float[] GetWorldValues()
+        {
+            List<float> values = new List<float>();
+            for(int i = 0; i < faceVals.GetLength(0); i++)
+            {
+                String key = faceVals[i, 0];
+                if(targetMorph.Contains(key))
+                {
+                    values.Add(targetMorph.BlendValues[(int)targetMorph.hash[key]]);
+                }
+            }
+            return values.ToArray();
         }
 
         public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)

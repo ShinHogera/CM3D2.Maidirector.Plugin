@@ -119,15 +119,17 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
+        public override string GetName() => $"IK: {this.maid.name}";
+
         public override void AddClipInternal(MovieCurveClip clip)
         {
             foreach(string targetName in TARGET_NAMES)
             {
-                float[] values = GetValues(targetName);
-                for (int j = 0; j < values.Length; j++)
-                {
-                    clip.AddCurve(new MovieCurve(clip.length, values[j], targetName + "." + j));
-                }
+                // float[] values = GetValues(targetName);
+                // for (int j = 0; j < values.Length; j++)
+                // {
+                //     clip.AddCurve(new MovieCurve(clip.length, values[j], targetName + "." + j));
+                // }
             }
         }
 
@@ -148,9 +150,9 @@ namespace CM3D2.HandmaidsTale.Plugin
         }
     }
 
-        private float[] GetValues(string targetName)
+        public override float[] GetWorldValues()
         {
-            Transform target = this.targets[targetName];
+            Transform target = this.targets[TARGET_NAMES[0]];
             Vector3 rot = target.eulerAngles;
             Vector3 pos = target.position;
             return new float[] { rot[0], rot[1], rot[2], pos[0], pos[1], pos[2] };

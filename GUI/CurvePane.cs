@@ -8,7 +8,7 @@ namespace CM3D2.HandmaidsTale.Plugin
     {
         private Texture2D curveTexture;
         public bool needsUpdate { get; private set; }
-        private bool[][] dragging;
+        private bool[][][] dragging;
         private bool[] curvesVisible;
         private bool keyframeUpdated;
         private bool wrapModeChanged;
@@ -104,7 +104,6 @@ namespace CM3D2.HandmaidsTale.Plugin
         private Vector2 screenSpaceToTimeSpace(Vector2 vec, Rect rectItem)
         {
             vec.y = rectItem.height - vec.y;
-
             Vector2 result = new Vector2(Util.MapRange(vec.x, 0, rectItem.width, 0, 1),
                                          Util.MapRange(vec.y, 0, rectItem.height, rangeMin, rangeMax));
             return result;
@@ -122,7 +121,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUIColor color = null;
             if (curveIndex == this.selectedKeyframeCurveIndex && keyframeIndex == this.selectedKeyframeIndex)
             {
-                color = new GUIColor(Color.green, GUI.contentColor);
+                color = new GUIColor(CurveTexture.GetCurveColor(curveIndex), GUI.contentColor);
             }
 
             if (GUI.RepeatButton(pointRect, "o") || (dragged && Input.GetMouseButton(0)))
@@ -181,10 +180,14 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             this.RemakeTexture(ref clip);
 
-            this.dragging = new bool[clip.curves.Count][];
+            this.dragging = new bool[clip.curves.Count][][];
             for (int i = 0; i < clip.curves.Count; i++)
             {
-                dragging[i] = new bool[clip.curves[i].keyframes.Length];
+                dragging[i] = new bool[clip.curves[i].keyframes.Length][];
+                for(int j = 0; j < dragging[i].Length; j++)
+                {
+                    dragging[i][j] = new bool[3];
+                }
             }
 
             this.curvesVisible = new bool[clip.curves.Count];
@@ -219,7 +222,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             return new Vector2(mousePos.x - screenOffset.x, mousePos.y - screenOffset.y - 25);
         }
 
-        private Vector2 tangentDragPoint(Rect rectItem, Keyframe key1, Keyframe key2, bool show1, bool show2)
+        private Vector2 tangentDragPoint(Rect rectItem, Keyframe key1, Keyframe key2, ref bool[] dragging, bool show1, bool show2)
         {
             Vector2 p1 = new Vector2(key1.time, key1.value);
             Vector2 p2 = new Vector2(key2.time, key2.value);
@@ -239,19 +242,38 @@ namespace CM3D2.HandmaidsTale.Plugin
             float res1 = key1.outTangent;
             float res2 = key2.inTangent;
 
-            if (show1 && GUI.RepeatButton(new Rect(c1, new Vector2(20, 20)), "A"))
+            if (show1 &&
+                (GUI.RepeatButton(new Rect(c1, new Vector2(20, 20)), "A") || (dragging[1] && Input.GetMouseButton(0))))
             {
-                c1 = getMousePos();
-                c1 = screenSpaceToTimeSpace(c1, rectItem);
-                res1 = (c1.y - p1.y) / tangLengthY;
-                keyframeUpdated = true;
+                dragging[1] = true;
+                if(!keyframeUpdated)
+                {
+                    c1 = getMousePos();
+                    c1 = screenSpaceToTimeSpace(c1, rectItem);
+                    res1 = (c1.y - p1.y) / tangLengthY;
+                    keyframeUpdated = true;
+                }
             }
-            if (show2 && GUI.RepeatButton(new Rect(c2, new Vector2(20, 20)), "B"))
+            else
             {
-                c2 = getMousePos();
-                c2 = screenSpaceToTimeSpace(c2, rectItem);
-                res2 = -(c2.y - p2.y) / tangLengthY;
-                keyframeUpdated = true;
+                dragging[1] = false;
+            }
+
+            if (show2 &&
+                (GUI.RepeatButton(new Rect(c2, new Vector2(20, 20)), "B") || (dragging[2] && Input.GetMouseButton(0))))
+            {
+                dragging[2] = true;
+                if(!keyframeUpdated)
+                {
+                    c2 = getMousePos();
+                    c2 = screenSpaceToTimeSpace(c2, rectItem);
+                    res2 = -(c2.y - p2.y) / tangLengthY;
+                    keyframeUpdated = true;
+                }
+            }
+            else
+            {
+                dragging[2] = false;
             }
 
             return new Vector2(res1, res2);
@@ -304,9 +326,44 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.needsUpdate = true;
         }
 
+        private void tangentModeSelectors(ref MovieCurveClip clip, ref Rect rectItem)
+        {
+            int iTmp;
+            MovieCurve keyframeCurve = clip.curves[selectedKeyframeCurveIndex];
+
+            GUI.Label(rectItem, "Left Tangent Mode");
+
+            GUI.enabled = selectedKeyframeIndex > 0;
+            rectItem.y += rectItem.height;
+
+            iTmp = GUI.Toolbar(rectItem, (int)TangentUtility.GetKeyLeftTangentMode(keyframeCurve, selectedKeyframeIndex), TANGENT_MODES);
+            if(iTmp != (int)TangentUtility.GetKeyLeftTangentMode(keyframeCurve, selectedKeyframeIndex))
+            {
+                TangentUtility.SetKeyLeftTangentMode(keyframeCurve, selectedKeyframeIndex, (TangentUtility.TangentMode)iTmp);
+                this.needsUpdate = true;
+            }
+
+            GUI.enabled = true;
+            rectItem.y += rectItem.height;
+
+            GUI.Label(rectItem, "Right Tangent Mode");
+
+            GUI.enabled = selectedKeyframeIndex < clip.curves[selectedKeyframeCurveIndex].keyframes.Length - 1;
+            rectItem.y += rectItem.height;
+
+            iTmp = GUI.Toolbar(rectItem, (int)TangentUtility.GetKeyRightTangentMode(keyframeCurve, selectedKeyframeIndex), TANGENT_MODES);
+            if(iTmp != (int)TangentUtility.GetKeyRightTangentMode(keyframeCurve, selectedKeyframeIndex))
+            {
+                TangentUtility.SetKeyRightTangentMode(keyframeCurve, selectedKeyframeIndex, (TangentUtility.TangentMode)iTmp);
+                this.needsUpdate = true;
+            }
+
+            GUI.enabled = true;
+        }
+
         private void curveDetailPanel(Rect panelRect, ref MovieCurveClip clip)
         {
-            GUILayout.BeginArea(panelRect);
+            GUI.BeginGroup(panelRect);
             Rect rectItem = new Rect(0, 0, panelRect.width / 4, 20);
             if (GUI.Button(rectItem, "-"))
             {
@@ -346,53 +403,62 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.FitAllCurves(clip);
             }
 
-            rectItem.width = panelRect.width;
             rectItem.x = 0;
             rectItem.y += rectItem.height;
-            wrapBeforeBox.SetFromRect(rectItem);
-            wrapBeforeBox.ScreenPos = this.ScreenPos;
-            wrapBeforeBox.OnGUI();
-
-            rectItem.y += rectItem.height;
-            wrapAfterBox.SetFromRect(rectItem);
-            wrapAfterBox.OnGUI();
-            wrapAfterBox.ScreenPos = this.ScreenPos;
-
-            rectItem.y += rectItem.height;
+            rectItem.width = panelRect.width / 2;
 
             using( GUIColor color = new GUIColor( GUI.backgroundColor, CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) ) )
             {
                 GUI.Label(rectItem, $"Curve: {clip.curves[selectedKeyframeCurveIndex].name}");
             }
 
-            rectItem.y += rectItem.height;
-
-            int iTmp;
-            MovieCurve keyframeCurve = clip.curves[selectedKeyframeCurveIndex];
-
-            GUI.enabled = selectedKeyframeIndex > 0;
-
-            iTmp = GUI.Toolbar(rectItem, (int)TangentUtility.GetKeyLeftTangentMode(keyframeCurve, selectedKeyframeIndex), TANGENT_MODES);
-            if(iTmp != (int)TangentUtility.GetKeyLeftTangentMode(keyframeCurve, selectedKeyframeIndex))
+            rectItem.x += rectItem.width;
+            rectItem.width = panelRect.width / 4;
+            if(GUI.Button(rectItem, "<"))
             {
-                TangentUtility.SetKeyLeftTangentMode(keyframeCurve, selectedKeyframeIndex, (TangentUtility.TangentMode)iTmp);
-                this.needsUpdate = true;
+                if(this.selectedKeyframeCurveIndex == 0)
+                    this.selectedKeyframeCurveIndex = clip.curves.Count - 1;
+                else
+                    this.selectedKeyframeCurveIndex--;
+
+                this.SelectKeyframe(this.selectedKeyframeCurveIndex, 0);
             }
 
-            GUI.enabled = selectedKeyframeIndex < clip.curves[selectedKeyframeCurveIndex].keyframes.Length - 1;
-
-            rectItem.y += rectItem.height;
-            iTmp = GUI.Toolbar(rectItem, (int)TangentUtility.GetKeyRightTangentMode(keyframeCurve, selectedKeyframeIndex), TANGENT_MODES);
-            if(iTmp != (int)TangentUtility.GetKeyRightTangentMode(keyframeCurve, selectedKeyframeIndex))
+            rectItem.x += rectItem.width;
+            if(GUI.Button(rectItem, ">"))
             {
-                TangentUtility.SetKeyRightTangentMode(keyframeCurve, selectedKeyframeIndex, (TangentUtility.TangentMode)iTmp);
-                this.needsUpdate = true;
+                if(this.selectedKeyframeCurveIndex == clip.curves.Count - 1)
+                    this.selectedKeyframeCurveIndex = 0;
+                else
+                    this.selectedKeyframeCurveIndex++;
+
+                this.SelectKeyframe(this.selectedKeyframeCurveIndex, 0);
             }
 
-            GUI.enabled = true;
-
+            rectItem.x = 0;
+            rectItem.width = panelRect.width / 2;
+            rectItem.y += rectItem.height;
 
             bool bTmp;
+            GUIStyle style = new GUIStyle("button");
+            using( GUIColor color = new GUIColor( this.isInserting ? CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) : GUI.backgroundColor, GUI.contentColor ) )
+            {
+                bTmp = GUI.Toggle(rectItem, this.isInserting, "Insert", style);
+                if(bTmp != isInserting)
+                {
+                    this.isInserting = bTmp;
+                }
+            }
+
+            rectItem.x += rectItem.width;
+            this.keyframeDeleteButton(rectItem, ref clip);
+
+            rectItem.x = 0;
+            rectItem.width = panelRect.width;
+            rectItem.y += rectItem.height;
+
+            this.tangentModeSelectors(ref clip, ref rectItem);
+
             bool val = TangentUtility.GetKeyBroken(clip.curves[selectedKeyframeCurveIndex], selectedKeyframeIndex);
 
             // rectItem.width = panelRect.width / 2;
@@ -412,21 +478,23 @@ namespace CM3D2.HandmaidsTale.Plugin
             //     this.needsUpdate = true;
             // }
 
-            // rectItem.x = 0;
-            rectItem.width = panelRect.width / 2;
+            rectItem.width = panelRect.width;
+            rectItem.x = 0;
             rectItem.y += rectItem.height;
+            wrapBeforeBox.SetFromRect(rectItem);
+            wrapBeforeBox.OnGUI();
 
-            GUIStyle style = new GUIStyle("button");
-            using( GUIColor color = new GUIColor( this.isInserting ? Color.green : GUI.backgroundColor, GUI.contentColor ) )
-            {
-                bTmp = GUI.Toggle(rectItem, this.isInserting, "Insert", style);
-                if(bTmp != isInserting)
-                {
-                    this.isInserting = bTmp;
-                }
-            }
+            rectItem.y += rectItem.height;
+            wrapAfterBox.SetFromRect(rectItem);
+            wrapAfterBox.OnGUI();
 
-            rectItem.x += rectItem.width;
+            // rectItem.x = 0;
+
+            GUI.EndGroup();
+        }
+
+        private void keyframeDeleteButton(Rect rectItem, ref MovieCurveClip clip)
+        {
             if (GUI.Button(rectItem, "Delete"))
             {
                 if(clip.curves[selectedKeyframeCurveIndex].curve.length > 1)
@@ -435,13 +503,11 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.UpdateFromClip(clip);
                 }
             }
-
-            GUILayout.EndArea();
         }
 
         private void curveToggleVisiblePanel(Rect panelRect, ref MovieCurveClip clip)
         {
-            GUILayout.BeginArea(panelRect);
+            GUI.BeginGroup(panelRect);
             Rect rectItem = new Rect(0, 0, panelRect.width/2, 20);
 
             if(GUI.Button(rectItem, "All On"))
@@ -480,7 +546,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 }
                 rectItem.y += rectItem.height;
             }
-            GUILayout.EndArea();
+            GUI.EndGroup();
         }
 
         private void DrawCurveView(Rect curveRect, ref MovieCurveClip clip)
@@ -497,7 +563,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 for (int j = 0; j < clip.curves[i].keyframes.Length; j++)
                 {
                     this.keyframeUpdated = false;
-                    Keyframe key = this.keyframeDragPoint(curveAreaRect, clip.curves[i].keyframes[j], ref dragging[i][j], i, j);
+                    Keyframe key = this.keyframeDragPoint(curveAreaRect, clip.curves[i].keyframes[j], ref dragging[i][j][0], i, j);
                     if (this.keyframeUpdated)
                     {
                         clip.curves[i].TryMoveKey(j, key);
@@ -514,7 +580,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                         Keyframe key2 = clip.curves[i].keyframes[j + 1];
                         bool show1 = TangentUtility.GetKeyRightTangentMode(clip.curves[i], j) == TangentUtility.TangentMode.Free;
                         bool show2 = TangentUtility.GetKeyLeftTangentMode(clip.curves[i], j + 1) == TangentUtility.TangentMode.Free;
-                        Vector2 result = this.tangentDragPoint(curveAreaRect, key1, key2, show1, show2);
+                        Vector2 result = this.tangentDragPoint(curveAreaRect, key1, key2, ref dragging[i][j], show1, show2);
 
                         if(this.keyframeUpdated)
                         {
@@ -586,14 +652,17 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
-        private void keyframeScrollPane(Rect keyframeViewRect, ref MovieCurveClip clip)
+        private void keyframeScrollPanel(Rect keyframeViewRect, ref MovieCurveClip clip)
         {
             for(int i = 0; i < clip.curves.Count; i++)
             {
                 MovieCurve curve = clip.curves[i];
                 float yPos = i * 20;
 
-                GUI.Label(new Rect(keyframeViewRect.x, yPos - this.keyframeScrollPosition.y, 100, 20), curve.name);
+                using( GUIColor color = new GUIColor( GUI.backgroundColor, CurveTexture.GetCurveColor(i) ) )
+                {
+                    GUI.Label(new Rect(keyframeViewRect.x, yPos - this.keyframeScrollPosition.y, 100, 20), curve.name);
+                }
             }
 
             keyframeViewRect.x += 100;
@@ -617,9 +686,13 @@ namespace CM3D2.HandmaidsTale.Plugin
                     keyframeScrollWidth = Mathf.Max(keyframeScrollWidth, xPos + 20);
 
                     Rect keyframeButton = new Rect(xPos, yPos, 20, 20);
-                    if(GUI.Button(keyframeButton, "x"))
+
+                    using( GUIColor color = new GUIColor( CurveTexture.GetCurveColor(i), CurveTexture.GetCurveColor(i) ) )
                     {
-                        this.SelectKeyframe(i, j);
+                        if(GUI.Button(keyframeButton, "x"))
+                        {
+                            this.SelectKeyframe(i, j);
+                        }
                     }
                 }
                 keyframeScrollHeight = Mathf.Max(keyframeScrollHeight, yPos + 20);
@@ -627,7 +700,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUI.EndScrollView();
         }
 
-        private void keyframeDetailPane(Rect curveRect, Rect keyframeViewRect, ref MovieCurveClip clip)
+        private void keyframeDetailPanel(Rect curveRect, Rect keyframeViewRect, ref MovieCurveClip clip)
         {
             MovieCurve selectedKeyframeCurve = clip.curves[selectedKeyframeCurveIndex];
             if(selectedKeyframeCurve != null)
@@ -636,14 +709,20 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 Rect panelRect = new Rect(keyframeViewRect.width, 0, curveRect.width / 4, curveRect.height);
 
-                GUILayout.BeginArea(panelRect);
+                GUI.BeginGroup(panelRect);
 
                 Rect rectItem = new Rect(0, 0, panelRect.width, 20);
-                GUI.Label(rectItem, selectedKeyframeCurve.name);
+
+                using( GUIColor color = new GUIColor( GUI.backgroundColor, CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) ) )
+                {
+                    GUI.Label(rectItem, selectedKeyframeCurve.name);
+                }
 
                 rectItem.y += rectItem.height;
                 rectItem.width = panelRect.width / 2;
+                GUI.Label(rectItem, "Time");
 
+                rectItem.x += rectItem.width;
                 this.keyframeUpdated = false;
                 string sTmp = GUI.TextField(rectItem, this.keyframeValueStrings[0], gsText);
                 if (sTmp != this.keyframeValueStrings[0])
@@ -658,6 +737,10 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.keyframeValueStrings[0] = sTmp;
                 }
 
+                rectItem.x = 0;
+                rectItem.y += rectItem.height;
+                GUI.Label(rectItem, "Value");
+
                 rectItem.x += rectItem.width;
                 sTmp = GUI.TextField(rectItem, this.keyframeValueStrings[1], gsText);
                 if (sTmp != this.keyframeValueStrings[1])
@@ -671,20 +754,28 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.keyframeValueStrings[1] = sTmp;
                 }
 
+                rectItem.y += rectItem.height;
+                rectItem.width = panelRect.width;
+                rectItem.x = 0;
+                this.tangentModeSelectors(ref clip, ref rectItem);
+
                 if (this.keyframeUpdated)
                 {
                     this.UpdateSelectedKeyframe(clip, selectedKeyframe);
                 }
 
-                GUILayout.EndArea();
+                rectItem.y += rectItem.height;
+                this.keyframeDeleteButton(rectItem, ref clip);
+
+                GUI.EndGroup();
             }
         }
 
         private void DrawKeyframeView(Rect curveRect, ref MovieCurveClip clip)
         {
             Rect keyframeViewRect = new Rect(0, 0, curveRect.width / 4 * 3, curveRect.height);
-            this.keyframeScrollPane(keyframeViewRect, ref clip);
-            this.keyframeDetailPane(curveRect, keyframeViewRect, ref clip);
+            this.keyframeScrollPanel(keyframeViewRect, ref clip);
+            this.keyframeDetailPanel(curveRect, keyframeViewRect, ref clip);
         }
 
         private void RefreshSelectedClip(ref MovieCurveClip clip, int clipIndex, int trackIndex)
@@ -711,8 +802,10 @@ namespace CM3D2.HandmaidsTale.Plugin
         private void RefreshSelectedWrapMode(ref MovieCurveClip clip)
         {
             MovieCurve curve = clip.curves[selectedKeyframeCurveIndex];
-            curve.curve.preWrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapBeforeBox.SelectedItem);
-            curve.curve.postWrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapAfterBox.SelectedItem);
+            if(!string.IsNullOrEmpty(wrapBeforeBox.SelectedItem))
+                curve.curve.preWrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapBeforeBox.SelectedItem);
+            if(!string.IsNullOrEmpty(wrapAfterBox.SelectedItem))
+                curve.curve.postWrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapAfterBox.SelectedItem);
             this.wrapModeChanged = false;
 
             // refresh the texture
@@ -727,7 +820,21 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.needsUpdate = true;
         }
 
-        private bool SelectedClipChanged(ref MovieCurveClip clip, int clipIndex, int trackIndex) => this.selectedClipIndex != clipIndex || this.selectedTrackIndex != trackIndex || this.dragging.Length != clip.curves.Count;
+        private bool SelectedClipChanged(ref MovieCurveClip clip, int clipIndex, int trackIndex)
+            => this.selectedClipIndex != clipIndex ||
+            this.selectedTrackIndex != trackIndex ||
+            this.dragging.Length != clip.curves.Count ||
+            this.SelectedClipKeyframesChanged(ref clip);
+
+        private bool SelectedClipKeyframesChanged(ref MovieCurveClip clip)
+        {
+            for(int i = 0; i < this.dragging.Length; i++)
+            {
+                if(this.dragging[i].Length != clip.curves[i].keyframes.Length)
+                    return true;
+            }
+            return false;
+        }
 
         private void RemakeTexture(ref MovieCurveClip clip)
         {
@@ -749,8 +856,11 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
         }
 
-        public void Draw(Rect curveRect, List<MovieCurveClip> clips, int clipIndex, int trackIndex)
+        public void Draw(Rect curveRect, Rect rectGui, List<MovieCurveClip> clips, int clipIndex, int trackIndex)
         {
+            this.wrapBeforeBox.ScreenPos = new Rect(curveRect.x + (curveRect.width / 4) * 3 + rectGui.x, curveRect.y  + rectGui.y + 20, 0, 0);
+            this.wrapAfterBox.ScreenPos = new Rect(curveRect.x + (curveRect.width / 4) * 3 + rectGui.x, curveRect.y  + rectGui.y + 20, 0, 0);
+
             this.needsUpdate = false;
             MovieCurveClip clip = clips[clipIndex];
 

@@ -156,21 +156,32 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 this.isField = GUI.Toggle(rectItem, this.isField, "Is Field", new GUIStyle("toggle"));
 
-                rectItem.y += rectItem.height;
-                this.propertyBox.SetFromRect(rectItem);
-                this.propertyBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
-                this.propertyBox.OnGUI();
-
-                rectItem.y += rectItem.height;
-                this.fieldBox.SetFromRect(rectItem);
-                this.fieldBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
-                this.fieldBox.OnGUI();
+                if(isField)
+                {
+                    rectItem.y += rectItem.height;
+                    this.fieldBox.SetFromRect(rectItem);
+                    this.fieldBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.fieldBox.OnGUI();
+                    if(this.fieldBox.Items.Count == 0)
+                        GUI.enabled = false;
+                }
+                else
+                {
+                    rectItem.y += rectItem.height;
+                    this.propertyBox.SetFromRect(rectItem);
+                    this.propertyBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.propertyBox.OnGUI();
+                    if(this.propertyBox.Items.Count == 0)
+                        GUI.enabled = false;
+                }
 
                 rectItem.y += rectItem.height;
                 rectItem.width = (rect.width - iFontSize * 0.5f) / 2;
                 this.okButton.SetFromRect(rectItem);
                 this.okButton.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                 this.okButton.OnGUI();
+
+                GUI.enabled = true;
 
                 rectItem.x += rectItem.width;
                 this.cancelButton.SetFromRect(rectItem);

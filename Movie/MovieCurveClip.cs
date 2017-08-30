@@ -14,6 +14,15 @@ namespace CM3D2.HandmaidsTale.Plugin
         private int _frame;
         private int _length;
 
+        private int heldFrames;
+        private int notHeldFrames;
+        public bool wasPressed { get; private set; }
+        public bool wasClicked { get; private set; }
+        public bool isDragging { get; private set; }
+        public bool isResizingLeft { get; private set; }
+        public bool isResizingRight { get; private set; }
+        private Vector2 startClickPos;
+
         public int frame
         {
             get => this._frame;
@@ -112,7 +121,7 @@ namespace CM3D2.HandmaidsTale.Plugin
         public void Draw(Rect rectItem, Rect screenPos)
         {
             this.wasClicked = false;
-            if(GUI.RepeatButton(rectItem, ""))
+            if(GUI.RepeatButton(rectItem, "") || (this.isDragging && Input.GetMouseButton(0)))
             {
                 this.wasPressed = true;
                 notHeldFrames = 0;
@@ -148,15 +157,6 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUI.DrawTexture(rectItem, this.curveTexture);
         }
 
-        private int heldFrames;
-        private int notHeldFrames;
-        public bool wasPressed { get; private set; }
-        public bool wasClicked { get; private set; }
-        public bool isDragging { get; private set; }
-        public bool isResizingLeft { get; private set; }
-        public bool isResizingRight { get; private set; }
-        private Vector2 startClickPos;
-
         public bool HasTime(float time)
         {
             if (time < this.startSeconds || time > this.endSeconds)
@@ -172,11 +172,17 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.RemakeTexture();
         }
 
-        public void InsertKeyframeAtTime(float time)
+        public void InsertKeyframesAtTime(float time, float[] worldValues)
         {
-            foreach(MovieCurve curve in this.curves)
+            for(int i = 0; i < this.curves.Count; i++)
             {
-                curve.InsertKeyframeAtTime(time);
+                MovieCurve curve = this.curves[i];
+                float valInWorld = worldValues[i];
+
+                if(valInWorld != curve.Evaluate(time))
+                {
+                    curve.InsertKeyframeAtTime(time, valInWorld, true);
+                }
             }
         }
     }

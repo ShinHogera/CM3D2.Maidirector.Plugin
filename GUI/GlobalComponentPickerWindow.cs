@@ -60,7 +60,8 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             private List<GameObject> gameObjects;
             private List<Component> components;
-            private List<string> animationNames;
+            private List<PhotoMotionData> animations;
+            private List<int> maidIndices;
 
             private CustomComboBox trackTypeBox;
             private CustomComboBox objectBox;
@@ -82,12 +83,12 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             private Maid selectedMaid
             {
-                get => GameMain.Instance.CharacterMgr.GetMaid(maidBox.SelectedIndex);
+                get => GameMain.Instance.CharacterMgr.GetMaid(this.maidIndices[maidBox.SelectedIndex]);
             }
 
-            private string selectedAnimationName
+            private PhotoMotionData selectedAnimation
             {
-                get => this.animationNames[animationNameBox.SelectedIndex];
+                get => this.animations[animationNameBox.SelectedIndex];
             }
 
             public ComponentWindow(int iWIndowID)
@@ -95,6 +96,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 WINDOW_ID = iWIndowID;
 
                 this.trackTypeBox = new CustomComboBox( Enum.GetNames(typeof(TrackType) ));
+                this.trackTypeBox.SelectedIndex = 0;
 
                 // Object property track
                 this.objectBox = new CustomComboBox();
@@ -154,16 +156,14 @@ namespace CM3D2.HandmaidsTale.Plugin
             private void LoadMaids()
             {
                 List<string> maidNames = new List<string>();
+                maidIndices = new List<int>();
                 for(int i = 0; i < GameMain.Instance.CharacterMgr.GetMaidCount(); i++)
                 {
                     Maid maid = GameMain.Instance.CharacterMgr.GetMaid(i);
                     if(IsValidMaid(maid))
                     {
+                        maidIndices.Add(i);
                         maidNames.Add(maid.name);
-                    }
-                    else
-                    {
-                        maidNames.Add("");
                     }
                 }
                 this.maidBox.Items = maidNames.Select(mn => new GUIContent(mn)).ToList();
@@ -175,12 +175,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                 if(PhotoMotionData.data == null)
                     PhotoMotionData.Create();
 
-                var data = PhotoMotionData.data.Where(d => !d.is_mod &&
-                                                      !d.is_mypose &&
-                                                      !string.IsNullOrEmpty(d.direct_file));
-
-                this.animationNames = data.Select(d => d.direct_file).ToList();
-                this.animationNameBox.Items = data.Select(d => new GUIContent(d.name)).ToList();
+                this.animations = PhotoMotionData.data.Where(d => !string.IsNullOrEmpty(d.direct_file)).ToList();
+                this.animationNameBox.Items = this.animations.Select(d => new GUIContent(d.name)).ToList();
                 this.animationNameBox.SelectedIndex = 0;
             }
 
@@ -209,16 +205,16 @@ namespace CM3D2.HandmaidsTale.Plugin
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation)
                 {
-                    func(new MovieMaidAnimationTrack(this.selectedMaid, this.selectedAnimationName));
+                    func(new MovieMaidAnimationTrack(this.selectedMaid, this.selectedAnimation));
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace)
                 {
                     func(new MovieMaidFaceTrack(this.selectedMaid));
                 }
-                else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
-                {
-                    func(new MovieMaidIKTrack(this.selectedMaid));
-                }
+                // else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
+                // {
+                //     func(new MovieMaidIKTrack(this.selectedMaid));
+                // }
                 this.show = false;
             }
 
@@ -242,19 +238,25 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.objectBox.SetFromRect(rectItem);
                     this.objectBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.objectBox.OnGUI();
+                    if(this.objectBox.Items.Count == 0)
+                        GUI.enabled = false;
 
                     rectItem.y += rectItem.height;
                     this.componentBox.SetFromRect(rectItem);
                     this.componentBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.componentBox.OnGUI();
+                    if(this.componentBox.Items.Count == 0)
+                        GUI.enabled = false;
                 }
                 else if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation ||
-                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace ||
-                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
+                        this.trackTypeBox.SelectedIndex == (int)TrackType.MaidFace)
+                    // || this.trackTypeBox.SelectedIndex == (int)TrackType.MaidIK)
                 {
                     this.maidBox.SetFromRect(rectItem);
                     this.maidBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.maidBox.OnGUI();
+                    if(this.maidBox.Items.Count == 0)
+                        GUI.enabled = false;
                 }
 
                 if(this.trackTypeBox.SelectedIndex == (int)TrackType.MaidAnimation)
@@ -263,6 +265,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                     this.animationNameBox.SetFromRect(rectItem);
                     this.animationNameBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.animationNameBox.OnGUI();
+                    if(this.animationNameBox.Items.Count == 0)
+                        GUI.enabled = false;
                 }
 
                 rectItem.y += rectItem.height;
@@ -270,6 +274,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.okButton.SetFromRect(rectItem);
                 this.okButton.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                 this.okButton.OnGUI();
+
+                GUI.enabled = true;
 
                 rectItem.x += rectItem.width;
                 this.cancelButton.SetFromRect(rectItem);
@@ -308,7 +314,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 CameraTarget,
                 MaidAnimation,
                 MaidFace,
-                MaidIK
+                // MaidIK
             }
         }
     }

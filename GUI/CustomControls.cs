@@ -636,7 +636,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 // ドロップダウンリスト表示の場合
                 if( this._items != null && this._isShowDropDownList )
                 {
-                    float maxDropDownListHeight = Screen.height - this.ScreenPos.y - comboListStyle.CalcHeight( this.comboBoxButton, 1.0f);
+                    float maxDropDownListHeight = Screen.height - this.ScreenPos.y - comboListStyle.CalcHeight( this.comboBoxButton, 1.0f) * 3;
                     float itemHeight = comboListStyle.CalcHeight( this.comboBoxButton, 1.0f ) * ( this._items.Count );
                     float windowHeight = maxDropDownListHeight < itemHeight ? maxDropDownListHeight : itemHeight;
 
@@ -2044,10 +2044,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             if(GUI.RepeatButton(pointRect, "asd"))
             {
                 Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-                Debug.Log(this._value);
-                Debug.Log(Input.mousePosition + " " + this.ScreenOffset);
                 this._value = new Vector2(mousePos.x - this.ScreenOffset.x, mousePos.y - this.ScreenOffset.y);
-                Debug.Log(this._value);
 
                 this._value.x = Mathf.Clamp(this._value.x, 0, this.Width);
                 this._value.y = Mathf.Clamp(this._value.y, 0, this.Height);

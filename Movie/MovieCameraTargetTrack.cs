@@ -9,15 +9,25 @@ using CM3D2.HandmaidsTale.Plugin;
 public class MovieCameraTargetTrack : MovieTrack
 {
     private static readonly string[] NAMES = new string[] {
-        "Distance",
-        "Orbit X",
-        "Orbit Y",
         "Pos X",
         "Pos Y",
-        "Pos Z"
+        "Pos Z",
+        "Orbit X",
+        "Orbit Y",
+        "Rotation Z",
+        "Distance",
+        "Field Of View"
     };
 
-    public MovieCameraTargetTrack() : base() {}
+    private CameraMain mainCam;
+    private Camera camCompo;
+
+    public override string GetName() => "Camera";
+
+    public MovieCameraTargetTrack() : base() {
+        this.mainCam = GameMain.Instance.MainCamera;
+        this.camCompo = this.mainCam.GetComponent<Camera>();
+    }
 
     public override void AddClipInternal(MovieCurveClip clip)
     {
@@ -29,30 +39,40 @@ public class MovieCameraTargetTrack : MovieTrack
 
     private void AddCurves(MovieCurveClip clip)
     {
-        float[] values = GetValues();
+        float[] values = GetWorldValues();
         for (int j = 0; j < values.Length; j++)
         {
             clip.AddCurve(new MovieCurve(clip.length, values[j], NAMES[j]));
         }
     }
 
-    private float[] GetValues()
+    public override float[] GetWorldValues()
     {
-        float dist = GameMain.Instance.MainCamera.GetDistance();
-        Vector2 rot = GameMain.Instance.MainCamera.GetAroundAngle();
-        Vector3 pos = GameMain.Instance.MainCamera.GetTargetPos();
-        return new float[] { dist, rot[0], rot[1], pos[0], pos[1], pos[2] };
+        Vector3 pos = this.mainCam.GetTargetPos();
+        Vector2 rot = this.mainCam.GetAroundAngle();
+        float rotZ = this.camCompo.transform.eulerAngles.z;
+        float dist = this.mainCam.GetDistance();
+        float fov = this.camCompo.fieldOfView;
+        return new float[] { pos[0], pos[1], pos[2], rot[0], rot[1], rotZ, dist, fov};
     }
 
     public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
     {
         float[] values = clip.curves.Select(c => c.Evaluate(sampleTime)).ToArray();
 
-        float dist = values[0];
-        Vector2 rot = new Vector2(values[1], values[2]);
-        Vector3 pos = new Vector3(values[3], values[4], values[5]);
-        GameMain.Instance.MainCamera.SetDistance(dist, true);
-        GameMain.Instance.MainCamera.SetAroundAngle(rot, true);
-        GameMain.Instance.MainCamera.SetTargetPos(pos, true);
+        Vector3 pos = new Vector3(values[0], values[1], values[2]);
+        Vector2 rot = new Vector2(values[3], values[4]);
+        float rotZ = values[5];
+        float dist = values[6];
+        float fov = values[7];
+
+        this.mainCam.SetDistance(dist, true);
+        this.mainCam.SetAroundAngle(rot, true);
+        this.mainCam.SetTargetPos(pos, true);
+
+        this.camCompo.fieldOfView = fov;
+        Vector3 eulerAngles = this.camCompo.transform.eulerAngles;
+        eulerAngles.z = rotZ;
+        this.camCompo.transform.eulerAngles = eulerAngles;
     }
 }

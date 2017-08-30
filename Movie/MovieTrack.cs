@@ -12,6 +12,7 @@ namespace CM3D2.HandmaidsTale.Plugin
         public List<MovieCurveClip> clips;
         public bool wantsDelete { get; private set; }
         public bool enabled { get; set; } = true;
+        public bool inserted { get; private set; }
 
         public float endTime
         {
@@ -59,10 +60,17 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public abstract void PreviewTimeInternal(MovieCurveClip clip, float sampleTime);
         public abstract void AddClipInternal(MovieCurveClip clip);
+        public abstract float[] GetWorldValues();
+
+        public virtual string GetName() => "Track";
+        public virtual float[] GetValues(MovieCurveClip clip, float sampleTime)
+            => clip.curves.Select(curve => curve.Evaluate(sampleTime)).ToArray();
 
         public virtual void DrawPanelExtra(float currentTime) {}
         public virtual void DrawPanel(float currentTime)
         {
+            this.inserted = false;
+
             Rect rect = new Rect(0, 0, 25, 15);
             using( GUIColor color = new GUIColor( this.enabled ? Color.green : GUI.backgroundColor, GUI.contentColor ) )
             {
@@ -77,7 +85,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             rect.x = 25;
             if (GUI.Button(rect, "K"))
             {
-                this.InsertKeyframeAtTime(currentTime);
+                this.InsertKeyframesAtTime(currentTime);
             }
 
             rect.x = 0;
@@ -85,6 +93,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             if (GUI.Button(rect, "C"))
             {
                 this.InsertNewClip();
+                this.inserted = true;
             }
 
             rect.x = 25;
@@ -106,21 +115,25 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.wantsDelete = true;
         }
 
-        public void ProcessAndAddClip(MovieCurveClip clip)
+        public int ProcessAndAddClip(MovieCurveClip clip)
         {
             if(this.CanInsertClip(clip.frame, clip.length))
             {
                 this.AddClipInternal(clip);
                 this.clips.Add(clip);
             }
+            int idx = this.clips.Count - 1;
+            return idx;
         }
 
-        public void AddClip(MovieCurveClip clip)
+        public int AddClip(MovieCurveClip clip)
         {
             if(this.CanInsertClip(clip.frame, clip.length))
             {
                 this.clips.Add(clip);
             }
+            int idx = this.clips.Count - 1;
+            return idx;
         }
 
         public bool CanInsertClip(int frame, int length, MovieCurveClip ignore = null)
@@ -135,7 +148,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             return true;
         }
 
-        protected int NextOpenFrame(int desiredLength)
+        protected int NextOpenFrame(int desiredLength, int positionAfter = 0)
         {
             if (this.clips.Count == 0)
                 return 0;
@@ -145,11 +158,9 @@ namespace CM3D2.HandmaidsTale.Plugin
                 .Select((e, i) => new { A = e, B = this.clips[i + 1] });
             foreach (var pair in adjacentClipPairs)
             {
-                Debug.Log(pair.B.frame + " " + pair.A.end);
-                if (pair.B.frame - pair.A.end > desiredLength)
+                if (pair.B.frame - pair.A.end > desiredLength && pair.A.end >= positionAfter)
                     return pair.A.end + 1;
             }
-            Debug.Log("Last");
             return this.clips.Last().end + 1;
         }
 
@@ -158,7 +169,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             return (overallTime - clip.startSeconds) / clip.lengthSeconds;
         }
 
-        public void InsertKeyframeAtTime(float time)
+        public void InsertKeyframesAtTime(float time)
         {
             MovieCurveClip currentClip = this.GetClipForTime(time);
 
@@ -169,7 +180,8 @@ namespace CM3D2.HandmaidsTale.Plugin
             }
             float sampleTime = GetClipSampleTime(currentClip, time);
 
-            currentClip.InsertKeyframeAtTime(sampleTime);
+            float[] worldValues = this.GetWorldValues();
+            currentClip.InsertKeyframesAtTime(sampleTime, worldValues);
         }
 
         protected MovieCurveClip GetClipForTime(float time)
@@ -211,23 +223,30 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.InsertClipAtFreePos(new MovieCurveClip(0, 300), true);
         }
 
-        public void InsertClipAtFreePos(MovieCurveClip clip, bool process)
+        public int InsertClipAtFreePos(MovieCurveClip clip, bool process, bool snapBefore = true)
         {
-            int nextOpenFrame = this.NextOpenFrame(clip.length);
+            int end = clip.frame;
+            if(snapBefore)
+                end = clip.frame - clip.length;
+
+            int nextOpenFrame = this.NextOpenFrame(clip.length, clip.frame);
             clip.frame = nextOpenFrame;
 
+            int idx;
             if(process)
-                this.ProcessAndAddClip(clip);
+                idx = this.ProcessAndAddClip(clip);
             else
-                this.AddClip(clip);
+                idx = this.AddClip(clip);
+            return idx;
         }
 
-        public void CopyClip(int index)
+        public int CopyClip(int index)
         {
             if(index < 0 || index >= this.clips.Count)
-                return;
+                return index;
+
             MovieCurveClip toCopy = this.clips[index];
-            this.InsertClipAtFreePos(new MovieCurveClip(toCopy), false);
+            return this.InsertClipAtFreePos(new MovieCurveClip(toCopy), false);
         }
 
         public void DeleteClip(int index)
@@ -236,6 +255,21 @@ namespace CM3D2.HandmaidsTale.Plugin
                 return;
 
             this.clips.RemoveAt(index);
+        }
+
+        public int ResolveCollision(int index)
+        {
+            if(index < 0 || index >= this.clips.Count)
+                return index;
+
+            MovieCurveClip current = this.clips[index];
+            bool collides = this.clips.Any(clip => clip != current && current.end >= clip.frame && current.frame <= clip.end);
+            if(collides)
+            {
+                this.DeleteClip(index);
+                index = this.InsertClipAtFreePos(current, false);
+            }
+            return index;
         }
     }
 }

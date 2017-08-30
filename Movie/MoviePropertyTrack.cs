@@ -36,6 +36,8 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.component = c;
         }
 
+        public override string GetName() => $"{target.name}: {this.component.GetType().Name}";
+
         public void AddProp(MovieProperty movieProp)
         {
             this.propsToChange.Add(movieProp);
@@ -107,6 +109,19 @@ namespace CM3D2.HandmaidsTale.Plugin
                     }
                 }
             }
+        }
+
+        public override float[] GetWorldValues()
+        {
+            List<float> values = new List<float>();
+            for (int i = 0; i < propsToChange.Count; i++)
+            {
+                MovieProperty prop = propsToChange[i];
+                float[] propValues = prop.GetValues(this.component);
+
+                values.AddRange(propValues);
+            }
+            return values.ToArray();
         }
 
         public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
