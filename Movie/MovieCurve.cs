@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public class MovieCurve
     {

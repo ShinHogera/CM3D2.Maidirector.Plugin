@@ -12,47 +12,11 @@ using UnityEngine;
 using UnityInjector;
 using UnityInjector.Attributes;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     #region PluginMain
-    ///=========================================================================
-    /// <summary>モーション変更</summary>
-    /// <remarks>
-    ///	CM3D2.ChangeMotion.Plugin : モーション等を変更させる UnityInjector/Sybaris 用クラス
-    ///
-    ///	機能
-    ///		F10/F11で設定画面表示/非表示切り替え
-    ///
-    ///	更新履歴
-    ///		1.0.0.0 CM3D2.changeface.Plugin.0.0.2.1を元に作成
-    ///		1.1.0.0	実行ボタン廃止、モーション名選択でモーション変更。
-    ///				前/次のモーションショートカットキー、実行ショートカットキー廃止。
-    ///				光源設定機能追加(光源強度、光源方向)。
-    ///				背景設定機能追加。
-    ///				表情設定機能追加(changefaceを元に作成。感謝)。
-    ///		1.2.0.0	モーションファイル検索方法変更。
-    ///				光源リセット機能追加。
-    ///				光源関係機能追加。
-    ///				メイド設定リセット機能追加。
-    ///				アイテム設定機能追加。
-    ///				顔の向き設定機能追加。
-    ///				背景設定機能追加。
-    ///				BGM設定機能追加。
-    ///				複数メイド機能追加。
-    ///		1.2.0.1	前回の編集対象メイドと違うメイドで再度編集画面に入り、
-    ///				前回の編集対象メイドを表示しようとしても表示できない不具合修正
-    ///		1.3.0.0	モーション一時停止機能追加
-    ///				モーション速度設定機能追加
-    ///				モーション再生位置設定機能追加
-    ///				夜伽画面で環境設定画面を表示する機能追加
-    ///				背景を不足分のみ表示から、全種類表示に変更
-    ///				[既知の問題]
-    ///					再度編集画面に入り直した際にモーションがモデルベースになる場合がある不具合
-    ///					モーション一時停止後、選択対象メイドを切り替えるとモーションの一時停止が解除される不具合
-    /// </remarks>
-    ///=========================================================================
-    [PluginFilter( "CM3D2x64" ), PluginFilter( "CM3D2x86" ), PluginFilter( "CM3D2VRx64" ), PluginName( "CM3D2.HandmaidsTale.Plugin" ), PluginVersion( "0.0.1.0" )]
-    public class HandmaidsTale : PluginBase
+    [PluginFilter( "CM3D2x64" ), PluginFilter( "CM3D2x86" ), PluginFilter( "CM3D2VRx64" ), PluginName( "Maidirector" ), PluginVersion( "0.0.1.0" )]
+    public class Maidirector : PluginBase
     {
         #region Methods
         ///-------------------------------------------------------------------------
@@ -64,12 +28,9 @@ namespace CM3D2.HandmaidsTale.Plugin
             {
                 GameObject.DontDestroyOnLoad( this );
 
-                // モーション情報初期化
                 ReadPluginPreferences();
                 CurveTexture.Init();
-                // ConstantValues.Initialize();
-                // Translation.Initialize(configLanguage);
-                // Util.LoadShaders();
+                Translation.Initialize(configLanguage);
             }
             catch( Exception e )
             {
@@ -84,27 +45,20 @@ namespace CM3D2.HandmaidsTale.Plugin
         {
             ConstantValues.Scene sceneLevel = ( ConstantValues.Scene )level;
 
-            // メイドエディット画面でない、かつ夜伽画面でない場合に、メイドエディット画面または夜伽画面に遷移した場合
-            // if( ( this.sceneNo != ConstantValues.Scene.SceneEdit && this.sceneNo != ConstantValues.Scene.SceneYotogi && this.sceneNo != ConstantValues.Scene.ScenePhoto ) &&
-            // 	( sceneLevel == ConstantValues.Scene.SceneEdit || sceneLevel == ConstantValues.Scene.SceneYotogi || sceneLevel == ConstantValues.Scene.ScenePhoto ) )
-            // {
-            // 初期化
-            // モーション情報初期化
-
             if(this.timelineWindow != null) {
                 // // メイドエディット画面または夜伽画面から、メイドエディット画面、夜伽画面以外に遷移した場合
                 if(( this.sceneNo == ConstantValues.Scene.ScenePhoto  ) &&
                    ( sceneLevel != ConstantValues.Scene.ScenePhoto ) )
                 {
                     initialized = false;
-                    // Translation.CurrentTranslation = configLanguage;
+                    Translation.CurrentTranslation = configLanguage;
 
                 }
                 else if (( this.sceneNo != ConstantValues.Scene.ScenePhoto  ) &&
                          ( sceneLevel == ConstantValues.Scene.ScenePhoto ) )
                 {
                     initialized = false;
-                    // Translation.CurrentTranslation = configLanguage;
+                    Translation.CurrentTranslation = configLanguage;
                 }
             }
 
@@ -168,12 +122,10 @@ namespace CM3D2.HandmaidsTale.Plugin
                     bool isShift = Input.GetKey( KeyCode.LeftShift ) || Input.GetKey( KeyCode.RightShift );
                     bool isAlt = Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt );
 
-                    // 表示中
                     if(this.Enable)
                     {
                         float windowWidth = Screen.width / 4 - ControlBase.FixedMargin * 2;
 
-                        // Vector2 point = new Vector2( Input.mousePosition.x, Screen.height - Input.mousePosition.y );
                         Rect pluginPos = new Rect( Screen.width - windowWidth, Screen.height / 15 + ControlBase.FixedMargin, Screen.width / 5 - Screen.width / 65, Screen.height - Screen.height / 5 );
 
                         if(selectedMode == ConstantValues.EditMode.Movie){
@@ -184,8 +136,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                             this.timelineWindow.OnGUI();
                         }
 
-                        // update external windows
-                        // only one of these are ever needed at a time
                         GlobalCurveWindow.Update();
                         GlobalComponentPicker.Update();
                         GlobalPropertyPicker.Update();
@@ -226,13 +176,13 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 float windowWidth = Screen.width / 4 - ControlBase.FixedMargin * 2;
 
-                this.timelineWindow = new TimelineWindow(fontSize, 401);
+                this.timelineWindow = new TimelineWindow(fontSize, "", 401);
                 timelineWindow.Left = 0;
                 timelineWindow.Top = 0;
                 timelineWindow.Width = 1000;
                 timelineWindow.Height = 800;
-                timelineWindow.rectGui.x = 110;
-                timelineWindow.rectGui.y = 110;
+                timelineWindow.rectGui.x = 100;
+                timelineWindow.rectGui.y = 100;
             }
             catch( Exception e )
             {
@@ -250,7 +200,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             try
             {
                 // 属性クラスからプラグイン名取得
-                PluginNameAttribute att = Attribute.GetCustomAttribute( typeof( HandmaidsTale ), typeof( PluginNameAttribute ) ) as PluginNameAttribute;
+                PluginNameAttribute att = Attribute.GetCustomAttribute( typeof( Maidirector ), typeof( PluginNameAttribute ) ) as PluginNameAttribute;
                 if( att != null )
                 {
                     name = att.Name;
@@ -274,7 +224,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             try
             {
                 // 属性クラスからバージョン番号取得
-                PluginVersionAttribute att = Attribute.GetCustomAttribute( typeof( HandmaidsTale ), typeof( PluginVersionAttribute ) ) as PluginVersionAttribute;
+                PluginVersionAttribute att = Attribute.GetCustomAttribute( typeof( Maidirector ), typeof( PluginVersionAttribute ) ) as PluginVersionAttribute;
                 if( att != null )
                 {
                     version = att.Version;

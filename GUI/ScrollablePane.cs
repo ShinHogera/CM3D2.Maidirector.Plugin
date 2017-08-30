@@ -10,7 +10,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     internal abstract class ScrollablePane : ControlBase
     {
@@ -18,7 +18,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public ScrollablePane() : base() {}
 
-        public ScrollablePane( int fontSize, int id )
+        public ScrollablePane( int fontSize, string name, int id )
         {
             try
             {
@@ -81,7 +81,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                     rectGui.y = screenSize.y - rectGui.height;
                 }
 
-                rectGui = GUI.Window(id, rectGui, GuiFunc, "", gsWin);
+                rectGui = GUI.Window(id, rectGui, GuiFunc, this.name, gsWin);
                 this.ScreenPos = new Rect(rectGui.x + guiScroll.x, rectGui.y - guiScroll.y, rectGui.width, rectGui.height);
 
                 {
@@ -97,8 +97,8 @@ namespace CM3D2.HandmaidsTale.Plugin
                     {
                         enableGameGui = !rectGui.Contains(mousePos);
                     }
-                    //GameMain.Instance.MainCamera.SetControl(enableGameGui);
-                    //UICamera.InputEnable = enableGameGui;
+                    // GameMain.Instance.MainCamera.SetControl(enableGameGui);
+                    // UICamera.InputEnable = enableGameGui;
                 }
             }
             catch( Exception e )
@@ -164,6 +164,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public static readonly float ITEM_SIZE = 18;
 
+        private string name = "";
         private float guiHeight;
         private float guiScrollHeight;
         private Vector2 screenSize;

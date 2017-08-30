@@ -4,8 +4,8 @@
     <ProjectGuid>{255101D1-B097-4334-8EA3-4A84D95EC9A4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CM3D2.HandmaidsTale.Plugin</RootNamespace>
-    <AssemblyName>CM3D2.HandmaidsTale.Plugin</AssemblyName>
+    <RootNamespace>CM3D2.Maidirector.Plugin</RootNamespace>
+    <AssemblyName>CM3D2.Maidirector.Plugin</AssemblyName>
     <TargetFramework>net35</TargetFramework>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

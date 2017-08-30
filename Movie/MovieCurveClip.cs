@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public class MovieCurveClip {
         private Texture2D curveTexture;
@@ -36,12 +36,12 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         public float startSeconds
         {
-            get => CM3D2.HandmaidsTale.Plugin.TimelineWindow.FACTOR * this.frame;
+            get => CM3D2.Maidirector.Plugin.TimelineWindow.FACTOR * this.frame;
         }
 
         public float lengthSeconds
         {
-            get => CM3D2.HandmaidsTale.Plugin.TimelineWindow.FACTOR * this.length;
+            get => CM3D2.Maidirector.Plugin.TimelineWindow.FACTOR * this.length;
         }
 
         public float endSeconds

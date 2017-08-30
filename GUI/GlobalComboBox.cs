@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     /// <summary>
     ///   Combobox window shared across all CustomComboBox objects.
@@ -68,7 +68,6 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             public Action<int> func { get; private set; }
 
-            private ScrollableComboBox box;
             public Vector2 scrollPos = new Vector2(0.0f, 0.0f);
             private Vector2 scrollPosOld = new Vector2(0.0f, 0.0f);
 
@@ -98,8 +97,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                 gsSelectionGrid.hover = gssWhite;
 
                 rectItem = new Rect(0f, 0f, rect.width, rect.height);
-
-                box = new ScrollableComboBox();
 
                 func = f;
 

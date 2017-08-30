@@ -5,9 +5,9 @@ using System.Reflection;
 using System;
 using System.IO;
 using System.Linq;
-using CM3D2.HandmaidsTale.Plugin;
+using CM3D2.Maidirector.Plugin;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public class MovieMaidAnimationTrack : MovieTrack
     {
@@ -24,7 +24,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.animationName = LoadAnimation(data, this.maid);
         }
 
-        public override string GetName() => $"Anim: {this.maid.name}";
+        public override string GetName() => $"Translation.GetText(\"UI\", \"animation\"): {this.maid.name}";
 
         public override void AddClipInternal(MovieCurveClip clip)
         {

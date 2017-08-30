@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public static class GlobalPropertyPicker
     {
@@ -118,10 +118,10 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.fieldBox = new CustomComboBox();
 
                 this.okButton = new CustomButton();
-                this.okButton.Text = "OK";
+                this.okButton.Text = Translation.GetText("UI", "ok");
                 this.okButton.Click = this.Ok;
                 this.cancelButton = new CustomButton();
-                this.cancelButton.Text = "Cancel";
+                this.cancelButton.Text = Translation.GetText("UI", "cancel");
                 this.cancelButton.Click = this.Cancel;
 
                 this.LoadProperties(component);
@@ -154,7 +154,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 int iFontSize = gsLabel.fontSize;
                 Rect rectItem = new Rect(iFontSize * 0.5f, iFontSize * 0.5f, rect.width - iFontSize * 0.5f, iFontSize * 1.5f);
 
-                this.isField = GUI.Toggle(rectItem, this.isField, "Is Field", new GUIStyle("toggle"));
+                this.isField = GUI.Toggle(rectItem, this.isField, Translation.GetText("PropertyPicker", "isField"), new GUIStyle("toggle"));
 
                 if(isField)
                 {

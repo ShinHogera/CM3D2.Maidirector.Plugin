@@ -1,0 +1,40 @@
+<Translations>
+  <Translation language="English">
+      <Timeline>
+          <drag>Drag</drag>
+          <resize>Resize</resize>
+          <curve>Curve</curve>
+          <keyframe>Keyframe</keyframe>
+          <frame>Frame</frame>
+          <addTrack>Add Track</addTrack>
+          <copyClip>Copy Clip</copyClip>
+          <deleteClip>Delete Clip</deleteClip>
+      </Timeline>
+      <CurvePane>
+          <center>Center</center>
+          <fitAll>Fit All</fitAll>
+          <insertKeyframe>Insert Key</insertKeyframe>
+          <deleteKeyframe>Delete Key</deleteKeyframe>
+          <leftTangentMode>Left Tangent Mode</leftTangentMode>
+          <rightTangentMode>Right Tangent Mode</rightTangentMode>
+          <keyframeBroken>Broken</keyframeBroken>
+          <wrapBefore>Wrap Before</wrapBefore>
+          <wrapAfter>Wrap After</wrapAfter>
+      </CurvePane>
+      <UI>
+          <ok>OK</ok>
+          <cancel>Cancel</cancel>
+          <camera>Camera</camera>
+          <posX>Position X</posX>
+          <posY>Position Y</posY>
+          <posZ>Position Z</posZ>
+          <orbitX>Orbit X</orbitX>
+          <orbitY>Orbit Y</orbitY>
+          <rotZ>Rotation Z</rotZ>
+          <distance>Distance</distance>
+          <fieldOfView>Field Of View</fieldOfView>
+      </UI>
+  </Translation>
+  <Translation language="日本語">
+  </Translation>
+</Translations>

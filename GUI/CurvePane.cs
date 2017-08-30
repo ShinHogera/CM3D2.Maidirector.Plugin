@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     internal class CurvePane : ControlBase
     {
@@ -71,14 +71,14 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.needsUpdate = true;
 
             this.wrapBeforeBox = new CustomComboBox(CURVE_WRAP_TYPES);
-            this.wrapBeforeBox.Text = "WrapBefore";
+            this.wrapBeforeBox.Text = Translation.GetText("CurvePane", "wrapBefore");
             this.wrapBeforeBox.SelectedIndexChanged += (o, e) =>
                 {
                     this.needsUpdate = true;
                     this.wrapModeChanged = true;
                 };
             this.wrapAfterBox = new CustomComboBox(CURVE_WRAP_TYPES);
-            this.wrapAfterBox.Text = "WrapAfter";
+            this.wrapAfterBox.Text = Translation.GetText("CurvePane", "wrapAfter");
             this.wrapAfterBox.SelectedIndexChanged += (o, e) =>
                 {
                     this.needsUpdate = true;
@@ -331,7 +331,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             int iTmp;
             MovieCurve keyframeCurve = clip.curves[selectedKeyframeCurveIndex];
 
-            GUI.Label(rectItem, "Left Tangent Mode");
+            GUI.Label(rectItem, Translation.GetText("CurvePane", "leftTangentMode"));
 
             GUI.enabled = selectedKeyframeIndex > 0;
             rectItem.y += rectItem.height;
@@ -346,7 +346,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUI.enabled = true;
             rectItem.y += rectItem.height;
 
-            GUI.Label(rectItem, "Right Tangent Mode");
+            GUI.Label(rectItem, Translation.GetText("CurvePane", "rightTangentMode"));
 
             GUI.enabled = selectedKeyframeIndex < clip.curves[selectedKeyframeCurveIndex].keyframes.Length - 1;
             rectItem.y += rectItem.height;
@@ -391,14 +391,14 @@ namespace CM3D2.HandmaidsTale.Plugin
             rectItem.width = panelRect.width / 2;
             rectItem.y += rectItem.height;
 
-            if(GUI.Button(rectItem, "Center"))
+            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "center")))
             {
                 this.CenterSelectedCurve(clip);
             }
 
             rectItem.x += rectItem.width;
 
-            if(GUI.Button(rectItem, "Fit All"))
+            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "fitAll")))
             {
                 this.FitAllCurves(clip);
             }
@@ -409,7 +409,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             using( GUIColor color = new GUIColor( GUI.backgroundColor, CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) ) )
             {
-                GUI.Label(rectItem, $"Curve: {clip.curves[selectedKeyframeCurveIndex].name}");
+                GUI.Label(rectItem, $"Translation.GetText(\"CurvePane\", \"selectedCurve\"): {clip.curves[selectedKeyframeCurveIndex].name}");
             }
 
             rectItem.x += rectItem.width;
@@ -443,7 +443,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUIStyle style = new GUIStyle("button");
             using( GUIColor color = new GUIColor( this.isInserting ? CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) : GUI.backgroundColor, GUI.contentColor ) )
             {
-                bTmp = GUI.Toggle(rectItem, this.isInserting, "Insert", style);
+                bTmp = GUI.Toggle(rectItem, this.isInserting, Translation.GetText("CurvePane", "insertKeyframe"), style);
                 if(bTmp != isInserting)
                 {
                     this.isInserting = bTmp;
@@ -464,7 +464,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             // rectItem.width = panelRect.width / 2;
             rectItem.y += rectItem.height;
 
-            bTmp = GUI.Toggle(rectItem, val, "Broken");
+            bTmp = GUI.Toggle(rectItem, val, Translation.GetText("CurvePane", "keyframeBroken"));
             if(bTmp != val)
             {
                 TangentUtility.SetKeyBroken(clip.curves[selectedKeyframeCurveIndex], selectedKeyframeIndex, bTmp);
@@ -495,7 +495,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
         private void keyframeDeleteButton(Rect rectItem, ref MovieCurveClip clip)
         {
-            if (GUI.Button(rectItem, "Delete"))
+            if (GUI.Button(rectItem, Translation.GetText("CurvePane", "deleteKeyframe")))
             {
                 if(clip.curves[selectedKeyframeCurveIndex].curve.length > 1)
                 {
@@ -510,7 +510,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             GUI.BeginGroup(panelRect);
             Rect rectItem = new Rect(0, 0, panelRect.width/2, 20);
 
-            if(GUI.Button(rectItem, "All On"))
+            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "allOn")))
             {
                 for(int i = 0; i < clip.curves.Count; i++)
                 {
@@ -520,7 +520,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             rectItem.x += rectItem.width;
 
-            if(GUI.Button(rectItem, "All Off"))
+            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "allOff")))
             {
                 for(int i = 0; i < clip.curves.Count; i++)
                 {
@@ -720,7 +720,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 rectItem.y += rectItem.height;
                 rectItem.width = panelRect.width / 2;
-                GUI.Label(rectItem, "Time");
+                GUI.Label(rectItem, Translation.GetText("CurvePane", "time"));
 
                 rectItem.x += rectItem.width;
                 this.keyframeUpdated = false;
@@ -739,7 +739,7 @@ namespace CM3D2.HandmaidsTale.Plugin
 
                 rectItem.x = 0;
                 rectItem.y += rectItem.height;
-                GUI.Label(rectItem, "Value");
+                GUI.Label(rectItem, Translation.GetText("CurvePane", "value"));
 
                 rectItem.x += rectItem.width;
                 sTmp = GUI.TextField(rectItem, this.keyframeValueStrings[1], gsText);

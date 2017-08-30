@@ -6,7 +6,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.Xml.Linq;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public abstract class MovieTrack {
         public List<MovieCurveClip> clips;
@@ -62,7 +62,7 @@ namespace CM3D2.HandmaidsTale.Plugin
         public abstract void AddClipInternal(MovieCurveClip clip);
         public abstract float[] GetWorldValues();
 
-        public virtual string GetName() => "Track";
+        public virtual string GetName() => Translation.GetText("UI", "track");
         public virtual float[] GetValues(MovieCurveClip clip, float sampleTime)
             => clip.curves.Select(curve => curve.Evaluate(sampleTime)).ToArray();
 

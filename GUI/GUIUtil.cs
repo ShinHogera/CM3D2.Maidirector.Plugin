@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     internal static class GUIUtil {
         private static GUIStyle gsLabel;

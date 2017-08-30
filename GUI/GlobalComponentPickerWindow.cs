@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public static class GlobalComponentPicker
     {
@@ -58,12 +58,13 @@ namespace CM3D2.HandmaidsTale.Plugin
             private GUIStyle gsLabel { get; set; }
             private GUIStyle gsButton { get; set; }
 
-            private List<GameObject> gameObjects;
+            private Dictionary<ObjectCategory, List<GameObject>> gameObjects;
             private List<Component> components;
             private List<PhotoMotionData> animations;
             private List<int> maidIndices;
 
             private CustomComboBox trackTypeBox;
+            private CustomComboBox objectCategoryBox;
             private CustomComboBox objectBox;
             private CustomComboBox componentBox;
             private CustomComboBox maidBox;
@@ -71,9 +72,14 @@ namespace CM3D2.HandmaidsTale.Plugin
             private CustomButton okButton;
             private CustomButton cancelButton;
 
+            private ObjectCategory selectedObjectCategory
+            {
+                get => (ObjectCategory)this.objectCategoryBox.SelectedIndex;
+            }
+
             private GameObject selectedObject
             {
-                get => this.gameObjects[objectBox.SelectedIndex];
+                get => this.gameObjects[selectedObjectCategory][objectBox.SelectedIndex];
             }
 
             private Component selectedComponent
@@ -95,13 +101,15 @@ namespace CM3D2.HandmaidsTale.Plugin
             {
                 WINDOW_ID = iWIndowID;
 
-                this.trackTypeBox = new CustomComboBox( Enum.GetNames(typeof(TrackType) ));
+                this.trackTypeBox = new CustomComboBox(Enum.GetNames(typeof(TrackType)));
                 this.trackTypeBox.SelectedIndex = 0;
 
                 // Object property track
+                this.objectCategoryBox = new CustomComboBox(Enum.GetNames(typeof(ObjectCategory)));
+                this.objectCategoryBox.SelectedIndex = 0;
+                this.objectCategoryBox.SelectedIndexChanged += this.SelectObjectCategory;
                 this.objectBox = new CustomComboBox();
                 this.objectBox.SelectedIndexChanged += this.SelectObject;
-
                 this.componentBox = new CustomComboBox();
 
                 // Maid track
@@ -111,10 +119,10 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.animationNameBox = new CustomComboBox();
 
                 this.okButton = new CustomButton();
-                this.okButton.Text = "OK";
+                this.okButton.Text = Translation.GetText("UI", "ok");
                 this.okButton.Click = this.Ok;
                 this.cancelButton = new CustomButton();
-                this.cancelButton.Text = "Cancel";
+                this.cancelButton.Text = Translation.GetText("UI", "cancel");
                 this.cancelButton.Click = this.Cancel;
             }
 
@@ -146,11 +154,32 @@ namespace CM3D2.HandmaidsTale.Plugin
             private bool IsPermittedGameObject(GameObject go) => go.activeInHierarchy &&
                 !go.GetComponents<Component>().Any(c => c.GetType().Name.StartsWith("UI"));
 
+            private bool IsCamera(GameObject go) => go.name.Contains("Camera") || go.GetComponent<Camera>() != null;
+
             private void LoadObjects()
             {
-                this.gameObjects = UnityEngine.Object.FindObjectsOfType<GameObject>().Where(this.IsPermittedGameObject).ToList();
-                this.objectBox.Items = this.gameObjects.Select(go => new GUIContent(go.name)).ToList();
-                this.objectBox.SelectedIndex = 0;
+                this.gameObjects = new Dictionary<ObjectCategory, List<GameObject>>();
+
+                this.gameObjects[ObjectCategory.All] = UnityEngine.Object.FindObjectsOfType<GameObject>().ToList();
+
+                if(GameMain.Instance.BgMgr.current_bg_object != null)
+                {
+                this.gameObjects[ObjectCategory.Background] = GameMain.Instance.BgMgr.current_bg_object
+                    .GetComponentsInChildren<Transform>()
+                    .Select(t => t.gameObject)
+                    .ToList();
+                }
+                else
+                {
+                    this.gameObjects[ObjectCategory.Background] = new List<GameObject>();
+                }
+                this.gameObjects[ObjectCategory.Background].Add(GameMain.Instance.BgMgr.current_bg_object);
+
+                this.gameObjects[ObjectCategory.Camera] = UnityEngine.Object.FindObjectsOfType<GameObject>()
+                    .Where(IsCamera)
+                    .ToList();
+
+                this.objectCategoryBox.SelectedIndex = 0;
             }
 
             private void LoadMaids()
@@ -182,13 +211,22 @@ namespace CM3D2.HandmaidsTale.Plugin
 
             private static bool IsValidMaid(Maid maid) => maid != null && maid.body0.trsHead != null && maid.Visible;
 
+            private void SelectObjectCategory(object sender, EventArgs args)
+            {
+                this.objectBox.Items = this.gameObjects[this.selectedObjectCategory]
+                    .Select(ob => new GUIContent(ob.GetType().Name))
+                    .ToList();
+
+                this.objectBox.SelectedIndex = 0;
+            }
+
             private void SelectObject(object sender, EventArgs args)
             {
                 int index = this.objectBox.SelectedIndex;
-                if (!this.gameObjects.Any() || index < 0 || index > this.gameObjects.Count)
+                if (!this.gameObjects.Any() || index < 0 || index > this.gameObjects[this.selectedObjectCategory].Count)
                     return;
 
-                this.components = this.gameObjects[index].GetComponents<Component>().ToList();
+                this.components = this.selectedObject.GetComponents<Component>().ToList();
                 this.componentBox.Items = this.components.Select(co => new GUIContent(co.GetType().Name)).ToList();
                 this.componentBox.SelectedIndex = 0;
             }
@@ -235,6 +273,10 @@ namespace CM3D2.HandmaidsTale.Plugin
                 rectItem.y += rectItem.height;
                 if(this.trackTypeBox.SelectedIndex == (int)TrackType.ObjectProperty)
                 {
+                    this.objectCategoryBox.SetFromRect(rectItem);
+                    this.objectCategoryBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
+                    this.objectCategoryBox.OnGUI();
+
                     this.objectBox.SetFromRect(rectItem);
                     this.objectBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.objectBox.OnGUI();
@@ -307,6 +349,12 @@ namespace CM3D2.HandmaidsTale.Plugin
                 return Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2);
             }
 
+            private enum ObjectCategory
+            {
+                Camera,
+                Background,
+                All
+            }
 
             private enum TrackType
             {

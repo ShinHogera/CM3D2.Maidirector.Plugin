@@ -10,15 +10,15 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
-    #region TestWindow
+    #region TimelineWindow
 
     internal class TimelineWindow : ScrollablePane
     {
         #region Methods
 
-        public TimelineWindow(int fontSize, int id) : base(fontSize, id)
+        public TimelineWindow(int fontSize, string name, int id) : base(fontSize, name, id)
         {
             this.tracks = new List<MovieTrack>();
             this.dragging = new List<bool>();
@@ -56,17 +56,17 @@ namespace CM3D2.HandmaidsTale.Plugin
                 this.ChildControls.Add(this.stopButton);
 
                 this.addButton = new Plugin.CustomButton();
-                this.addButton.Text = "+";
+                this.addButton.Text = Translation.GetText("Timeline", "addTrack");
                 this.addButton.Click += this.Add;
                 this.ChildControls.Add(this.addButton);
 
                 this.copyClipButton = new Plugin.CustomButton();
-                this.copyClipButton.Text = "Copy Clip";
+                this.copyClipButton.Text = Translation.GetText("Timeline", "copyClip");
                 this.copyClipButton.Click += this.CopyClip;
                 this.ChildControls.Add(this.copyClipButton);
 
                 this.deleteClipButton = new Plugin.CustomButton();
-                this.deleteClipButton.Text = "Delete Clip";
+                this.deleteClipButton.Text = Translation.GetText("Timeline", "deleteClip");
                 this.deleteClipButton.Click += this.DeleteClip;
                 this.ChildControls.Add(this.deleteClipButton);
 
@@ -89,7 +89,7 @@ namespace CM3D2.HandmaidsTale.Plugin
                 Rect seekerRect = new Rect(ControlBase.FixedMargin + seek, 0, 20, 40);
 
                 Rect labelRect = new Rect(seekerRect.x, seekerRect.y, 100, 40);
-                GUI.Label(labelRect, this.currentFrame + " frame");
+                GUI.Label(labelRect, Translation.GetText("Timeline", "frame") + " " + this.currentFrame);
 
                 if (GUI.RepeatButton(seekerRect, "") || (draggingSeeker && Input.GetMouseButton(0)))
                 {
@@ -220,23 +220,6 @@ namespace CM3D2.HandmaidsTale.Plugin
                 if (this.curvePane.needsUpdate)
                 {
                     this.updated = true;
-                }
-
-                {
-                    Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-
-                    bool enableGameGui = true;
-                    bool m = Input.GetAxis("Mouse ScrollWheel") != 0;
-                    for (int j = 0; j < 3; j++)
-                    {
-                        m |= Input.GetMouseButtonDown(j);
-                    }
-                    if (m)
-                    {
-                        enableGameGui = !this.rectGui.Contains(mousePos);
-                    }
-                    GameMain.Instance.MainCamera.SetControl(enableGameGui);
-                    UICamera.InputEnable = enableGameGui;
                 }
             }
             catch (Exception e)
@@ -442,15 +425,14 @@ namespace CM3D2.HandmaidsTale.Plugin
         #region Fields
         private static readonly string[] DRAG_MODES = new string[]
             {
-                // "[",
-                "Drag",
-                "Resize"
+                Translation.GetText("Timeline", "drag"),
+                Translation.GetText("Timeline", "resize"),
             };
 
         private static readonly string[] CURVE_PANE_MODES = new string[]
             {
-                "Curve",
-                "Key"
+                Translation.GetText("Timeline", "curve"),
+                Translation.GetText("Timeline", "keyframe")
             };
 
         private bool isPlaying;

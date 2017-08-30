@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
-using CM3D2.HandmaidsTale.Plugin;
+using CM3D2.Maidirector.Plugin;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public class MovieMaidFaceTrack : MovieTrack
     {
@@ -70,7 +70,7 @@ namespace CM3D2.HandmaidsTale.Plugin
             this.curveIdxToFaceValIdx = new List<int>();
         }
 
-        public override string GetName() => $"Face: {this.maid.name}";
+        public override string GetName() => $"Translation.GetText(\"UI\", \"face\"): {this.maid.name}";
 
         private void AddCurve(MovieCurveClip clip, int faceValIndex)
         {

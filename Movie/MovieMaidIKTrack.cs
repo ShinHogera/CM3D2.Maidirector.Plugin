@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
-using CM3D2.HandmaidsTale.Plugin;
+using CM3D2.Maidirector.Plugin;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     public class MovieMaidIKTrack : MovieTrack
     {

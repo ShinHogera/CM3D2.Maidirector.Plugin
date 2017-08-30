@@ -10,7 +10,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
-namespace CM3D2.HandmaidsTale.Plugin
+namespace CM3D2.Maidirector.Plugin
 {
     #region ConstantValues
     ///=========================================================================
@@ -130,11 +130,8 @@ namespace CM3D2.HandmaidsTale.Plugin
         #region Fields
         public static readonly string BaseConfigDir = Directory.GetCurrentDirectory() + @"\UnityInjector\Config";
         public static readonly string BaseConfigDirSybaris = Directory.GetCurrentDirectory() + @"\Sybaris\Plugins\UnityInjector\Config";
-        public static readonly string ConfigDir = BaseConfigDir + @"\SceneCapture";
-        public static readonly string ConfigDirSybaris = BaseConfigDirSybaris + @"\SceneCapture";
-
-        public static readonly List<string> ImageDirsLUT = new List<string> { @"SceneCapture\LUTs" };
-        public static readonly List<string> ImageDirsAll = new List<string> { @"SceneCapture\Images",  "PngPlacement" };
+        public static readonly string ConfigDir = BaseConfigDir + @"\" + Maidirector.GetPluginName();
+        public static readonly string ConfigDirSybaris = BaseConfigDirSybaris + @"\" + Maidirector.GetPluginName();
 
         /// <summary>ライト個数上限</summary>
         public const int MaxLightCount = 10;
