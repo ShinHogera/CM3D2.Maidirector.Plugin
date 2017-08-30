@@ -14,41 +14,41 @@ Place `Assembly-CSharp.dll`, `UnityEngine.dll`, `ExIni.dll`, and `UnityInjector.
 Photo mode is recommended.
 
 ### Timeline View
-Open the timeline window and press **Add Track** to create a track. The following track types are available:
-- **Camera**: Control the camera.
-- **Object**: Control the properties of any object in the scene.
-- **Maid Animation**: Play an animation on a maid. The animation speed can be changed by changing the size of the curve clip.
-- **Maid Face**: Control the parameters of maids' faces.
+Open the timeline window and press `Add Track` to create a track. The following track types are available:
+- `Camera`: Control the camera.
+- `Object`: Control the properties of any object in the scene.
+- `Maid Animation`: Play an animation on a maid. The animation speed can be changed by changing the size of the curve clip.
+- `Maid Face`: Control the parameters of maids' faces.
 
 These are the actions you can take using the buttons next to each track:
-- **[E]nable**: Enable/disable playback of the track's parameters.
-- **[K]eyframe**: Insert keyframes on this track using the current values of the track's target object at the current time. One way to use this is to place the camera in one place, insert a group of keyframes, then increment the time, move the camera to another location and insert another group of keyframes. This way you can interpolate between two states of the camera.
-- **[C]lip**: Insert a new clip.
-- **[-]**: Deletes the track.
-- **[+]**: In Object tracks, adds a property or field to modulate.
+- `[E]nable`: Enable/disable playback of the track's parameters.
+- `[K]eyframe`: Insert keyframes on this track using the current values of the track's target object at the current time. One way to use this is to place the camera in one place, insert a group of keyframes, then increment the time, move the camera to another location and insert another group of keyframes. This way you can interpolate between two states of the camera.
+- `[C]lip`: Insert a new clip.
+- `[-]`: Deletes the track.
+- `[+]`: In Object tracks, adds a property or field to modulate.
 
 Select a clip by clicking on it or dragging it and it will be displayed in the curve view.
 
-To resize tracks, press the **Resize** toggle and drag the clip you want to resize. To go back to dragging, press the **Drag** toggle.
+To resize tracks, press the `Resize` toggle and drag the clip you want to resize. To go back to dragging, press the `Drag` toggle.
 
 ### Curve View
 Here you can manipulate keyframes bound to the parameters of the selected clip by dragging the keyframe handles. Explanations of the other controls:
 
-- **-**/**+** - Zoom in and out.
-- **▲**/**▼** - Pan the view up and down.
-- **◀**/**▶** - Select the previous/next curve.
-- **Center** - Fit the selected curve to the curve window.
-- **Fit All** - Fit all curves to the curve window.
-- **Insert Key** - Starts insertion of a keyframe on the currently selected curve. To insert the keyframe, click the location in the curve window where you want the keyframe to be inserted in the selected curve.
-- **Delete Key** - Deletes the current (most recently selected) keyframe.
-- **Tangent Mode** - Changes the behavior of the selected keyframe's tangents.
-- **Broken** - Sets whether the selected keyframe's tangents should form a straight line or be controlled separately.
-- **Wrap Mode** - Changes the behavior of the curve past the first/last keyframes.
+- `-`/`+` - Zoom in and out.
+- `▲`/`▼` - Pan the view up and down.
+- `◀`/`▶` - Select the previous/next curve.
+- `Center` - Fit the selected curve to the curve window.
+- `Fit All` - Fit all curves to the curve window.
+- `Insert Key` - Starts insertion of a keyframe on the currently selected curve. To insert the keyframe, click the location in the curve window where you want the keyframe to be inserted in the selected curve.
+- `Delete Key` - Deletes the current (most recently selected) keyframe.
+- `Tangent Mode` - Changes the behavior of the selected keyframe's tangents.
+- `Broken` - Sets whether the selected keyframe's tangents should form a straight line or be controlled separately.
+- `Wrap Mode` - Changes the behavior of the curve past the first/last keyframes.
 
-The panel for toggling visibility of keyframes can be accessed with the **Toggle Visible** button. This is useful for accessing a specific curve when keyframes from other curves overlap.
+The panel for toggling visibility of keyframes can be accessed with the `Toggle Visible` button. This is useful for accessing a specific curve when keyframes from other curves overlap.
 
 ### Keyframe View
-Toggle the keyframe view by pressing the **Keyframe** button. This provides a top-down overview of all keyframes, similar to MikuMikuDance. Using this view, more precise values for keyframes can be input.
+Toggle the keyframe view by pressing the `Keyframe` button. This provides a top-down overview of all keyframes, similar to MikuMikuDance. Using this view, more precise values for keyframes can be input.
 
 ### Keybindings
 These are the default keybindings, but they can be edited in the `UnityInjector/Config/Maidirector.ini` config file.
