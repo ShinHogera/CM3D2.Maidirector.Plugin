@@ -101,22 +101,28 @@ namespace CM3D2.Maidirector.Plugin
             {
                 WINDOW_ID = iWIndowID;
 
-                this.trackTypeBox = new CustomComboBox(Enum.GetNames(typeof(TrackType)));
+                this.trackTypeBox = new CustomComboBox(Translation.GetEnum(typeof(TrackType)));
+                this.trackTypeBox.Text = Translation.GetText("ComponentPicker", "trackType");
                 this.trackTypeBox.SelectedIndex = 0;
 
                 // Object property track
-                this.objectCategoryBox = new CustomComboBox(Enum.GetNames(typeof(ObjectCategory)));
+                this.objectCategoryBox = new CustomComboBox(Translation.GetEnum(typeof(ObjectCategory)));
+                this.objectCategoryBox.Text = Translation.GetText("ComponentPicker", "objectCategory");
                 this.objectCategoryBox.SelectedIndex = 0;
                 this.objectCategoryBox.SelectedIndexChanged += this.SelectObjectCategory;
                 this.objectBox = new CustomComboBox();
+                this.objectBox.Text = Translation.GetText("ComponentPicker", "object");
                 this.objectBox.SelectedIndexChanged += this.SelectObject;
                 this.componentBox = new CustomComboBox();
+                this.componentBox.Text = Translation.GetText("ComponentPicker", "component");
 
                 // Maid track
                 this.maidBox = new CustomComboBox();
+                this.maidBox.Text = Translation.GetText("ComponentPicker", "maid");
 
                 // Maid animation track
                 this.animationNameBox = new CustomComboBox();
+                this.animationNameBox.Text = Translation.GetText("ComponentPicker", "animationName");
 
                 this.okButton = new CustomButton();
                 this.okButton.Text = Translation.GetText("UI", "ok");
@@ -164,16 +170,16 @@ namespace CM3D2.Maidirector.Plugin
 
                 if(GameMain.Instance.BgMgr.current_bg_object != null)
                 {
-                this.gameObjects[ObjectCategory.Background] = GameMain.Instance.BgMgr.current_bg_object
-                    .GetComponentsInChildren<Transform>()
-                    .Select(t => t.gameObject)
-                    .ToList();
+                    this.gameObjects[ObjectCategory.Background] = GameMain.Instance.BgMgr.current_bg_object
+                        .GetComponentsInChildren<Transform>()
+                        .Select(t => t.gameObject)
+                        .ToList();
+                    this.gameObjects[ObjectCategory.Background].Add(GameMain.Instance.BgMgr.current_bg_object);
                 }
                 else
                 {
                     this.gameObjects[ObjectCategory.Background] = new List<GameObject>();
                 }
-                this.gameObjects[ObjectCategory.Background].Add(GameMain.Instance.BgMgr.current_bg_object);
 
                 this.gameObjects[ObjectCategory.Camera] = UnityEngine.Object.FindObjectsOfType<GameObject>()
                     .Where(IsCamera)
@@ -213,8 +219,14 @@ namespace CM3D2.Maidirector.Plugin
 
             private void SelectObjectCategory(object sender, EventArgs args)
             {
+                if (!this.gameObjects[this.selectedObjectCategory].Any())
+                {
+                    this.objectBox.Items = new List<GUIContent>();
+                    return;
+                }
+
                 this.objectBox.Items = this.gameObjects[this.selectedObjectCategory]
-                    .Select(ob => new GUIContent(ob.GetType().Name))
+                    .Select(ob => new GUIContent(ob.name))
                     .ToList();
 
                 this.objectBox.SelectedIndex = 0;
@@ -277,6 +289,7 @@ namespace CM3D2.Maidirector.Plugin
                     this.objectCategoryBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.objectCategoryBox.OnGUI();
 
+                    rectItem.y += rectItem.height;
                     this.objectBox.SetFromRect(rectItem);
                     this.objectBox.ScreenPos = new Rect(rect.x, rect.y, 0, 0);
                     this.objectBox.OnGUI();
@@ -358,8 +371,8 @@ namespace CM3D2.Maidirector.Plugin
 
             private enum TrackType
             {
-                ObjectProperty,
                 CameraTarget,
+                ObjectProperty,
                 MaidAnimation,
                 MaidFace,
                 // MaidIK

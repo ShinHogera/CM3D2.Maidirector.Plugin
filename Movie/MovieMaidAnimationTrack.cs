@@ -24,7 +24,7 @@ namespace CM3D2.Maidirector.Plugin
             this.animationName = LoadAnimation(data, this.maid);
         }
 
-        public override string GetName() => $"Translation.GetText(\"UI\", \"animation\"): {this.maid.name}";
+        public override string GetName() => Translation.GetText("UI", "animation") + ": " + this.maid.name;
 
         public override void AddClipInternal(MovieCurveClip clip)
         {

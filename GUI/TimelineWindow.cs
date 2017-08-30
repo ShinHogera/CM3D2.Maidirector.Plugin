@@ -18,7 +18,7 @@ namespace CM3D2.Maidirector.Plugin
     {
         #region Methods
 
-        public TimelineWindow(int fontSize, string name, int id) : base(fontSize, name, id)
+        public TimelineWindow(int fontSize, int id) : base(fontSize, id)
         {
             this.tracks = new List<MovieTrack>();
             this.dragging = new List<bool>();
@@ -79,7 +79,7 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
-        private const float PANEL_WIDTH = 150;
+        private const float PANEL_WIDTH = 200;
 
         override public void ShowPane()
         {
@@ -88,7 +88,7 @@ namespace CM3D2.Maidirector.Plugin
                 float seek = this.seekerPos + PANEL_WIDTH - this.scrollPosition.x;
                 Rect seekerRect = new Rect(ControlBase.FixedMargin + seek, 0, 20, 40);
 
-                Rect labelRect = new Rect(seekerRect.x, seekerRect.y, 100, 40);
+                Rect labelRect = new Rect(seekerRect.x + seekerRect.width + 5, seekerRect.y, 100, 40);
                 GUI.Label(labelRect, Translation.GetText("Timeline", "frame") + " " + this.currentFrame);
 
                 if (GUI.RepeatButton(seekerRect, "") || (draggingSeeker && Input.GetMouseButton(0)))
@@ -110,7 +110,7 @@ namespace CM3D2.Maidirector.Plugin
                     MovieTrack track = this.tracks[i];
                     Rect panel = new Rect(0,
                                           this.scrollPosition.y + (this.ControlHeight * 2 * i),
-                                          PANEL_WIDTH - 100,
+                                          PANEL_WIDTH - 150,
                                           this.ControlHeight * 2);
 
                     GUILayout.BeginArea(panel);
@@ -124,8 +124,8 @@ namespace CM3D2.Maidirector.Plugin
 
                     GUIStyle style = new GUIStyle( "label" );
                     style.alignment = TextAnchor.MiddleLeft;
-                    panel.x = PANEL_WIDTH - 100 + ControlBase.FixedMargin;
-                    panel.width = 100 - ControlBase.FixedMargin * 2;
+                    panel.x = PANEL_WIDTH - 150 + ControlBase.FixedMargin;
+                    panel.width = 150 - ControlBase.FixedMargin * 2;
                     GUI.Label(panel, this.tracks[i].GetName(), style);
                 }
                 GUILayout.EndArea();
@@ -193,6 +193,7 @@ namespace CM3D2.Maidirector.Plugin
 
                 Rect toggleRect = this.deleteClipButton.WindowRect;
                 toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
+                toggleRect.width *= 1.5f;
                 int iTmp;
                 if ((iTmp = GUI.Toolbar(toggleRect, (int)this.dragMode, DRAG_MODES)) >= 0)
                 {
@@ -221,6 +222,23 @@ namespace CM3D2.Maidirector.Plugin
                 {
                     this.updated = true;
                 }
+
+                {
+                    Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+
+                    bool enableGameGui = true;
+                    bool m = Input.GetAxis("Mouse ScrollWheel") != 0;
+                    for (int i = 0; i < 3; i++)
+                    {
+                        m |= Input.GetMouseButtonDown(i);
+                    }
+                    if (m)
+                    {
+                        enableGameGui = !rectGui.Contains(mousePos);
+                    }
+                    GameMain.Instance.MainCamera.SetControl(enableGameGui);
+                    UICamera.InputEnable = enableGameGui;
+                }
             }
             catch (Exception e)
             {
@@ -247,7 +265,7 @@ namespace CM3D2.Maidirector.Plugin
             {
                 this.scrollPosition.x = 0;
             }
-            else if(seek >= this.guiScrollWidth - range + PANEL_WIDTH + 10)
+            else if(guiScrollWidth > this.rectGui.width && seek >= this.guiScrollWidth - range + PANEL_WIDTH + 10)
             {
                 this.scrollPosition.x = this.guiScrollWidth - this.rectGui.width + PANEL_WIDTH + 10;
             }
@@ -285,12 +303,12 @@ namespace CM3D2.Maidirector.Plugin
 
         private int TakeEndFrame() => (int)(this.tracks.OrderByDescending(track => track.endTime).First().endTime + 300);
 
-        private void Play(object sender, EventArgs args)
+        public void Play(object sender, EventArgs args)
         {
-            this.isPlaying = true;
+            this.isPlaying = !this.isPlaying;
         }
 
-        private void Stop(object sender, EventArgs args)
+        public void Stop(object sender, EventArgs args)
         {
             if(isPlaying == false)
             {
@@ -302,7 +320,7 @@ namespace CM3D2.Maidirector.Plugin
 
         private void Add(object sender, EventArgs args)
         {
-            GlobalComponentPicker.Set(new Vector2(100, 100), 200, this.FontSize, (existing) =>
+            GlobalComponentPicker.Set(new Vector2(this.rectGui.x + 250, this.rectGui.y - 20), 250, this.FontSize, (existing) =>
                     {
                         existing.InsertNewClip();
                         this.tracks.Add(existing);

@@ -70,7 +70,7 @@ namespace CM3D2.Maidirector.Plugin
             this.curveIdxToFaceValIdx = new List<int>();
         }
 
-        public override string GetName() => $"Translation.GetText(\"UI\", \"face\"): {this.maid.name}";
+        public override string GetName() => Translation.GetText("UI", "face") + ": " + this.maid.name;
 
         private void AddCurve(MovieCurveClip clip, int faceValIndex)
         {

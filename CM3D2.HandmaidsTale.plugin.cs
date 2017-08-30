@@ -81,7 +81,7 @@ namespace CM3D2.Maidirector.Plugin
                         }
                     }
 
-                    if( Input.GetKeyDown( configEffectKey ) )
+                    if( Input.GetKeyDown( configWindowKey ) )
                     {
                         if( this.selectedMode == ConstantValues.EditMode.Movie )
                         {
@@ -91,6 +91,14 @@ namespace CM3D2.Maidirector.Plugin
                         {
                             this.selectedMode = ConstantValues.EditMode.Movie;
                         }
+                    }
+                    else if( Input.GetKeyDown( configPlayKey ) )
+                    {
+                        this.timelineWindow.Play(this, new EventArgs());
+                    }
+                    else if( Input.GetKeyDown( configStopKey ) )
+                    {
+                        this.timelineWindow.Stop(this, new EventArgs());
                     }
 
                     // if( this.selectedMode == ConstantValues.EditMode.Movie )
@@ -174,15 +182,13 @@ namespace CM3D2.Maidirector.Plugin
                 else
                     fontSize = 11;
 
-                float windowWidth = Screen.width / 4 - ControlBase.FixedMargin * 2;
-
-                this.timelineWindow = new TimelineWindow(fontSize, "", 401);
+                this.timelineWindow = new TimelineWindow(fontSize, 401);
                 timelineWindow.Left = 0;
                 timelineWindow.Top = 0;
                 timelineWindow.Width = 1000;
                 timelineWindow.Height = 800;
-                timelineWindow.rectGui.x = 100;
-                timelineWindow.rectGui.y = 100;
+                timelineWindow.rectGui.x = 200;
+                timelineWindow.rectGui.y = 200;
             }
             catch( Exception e )
             {
@@ -295,13 +301,13 @@ namespace CM3D2.Maidirector.Plugin
         private void ReadPluginPreferences()
         {
             configLanguage = GetPreferences("Config", "Language", "English");
-            configEffectKey = GetPreferences("Config", "EffectWindowKey", "m");
-            configEnvironmentKey = GetPreferences("Config", "EnvironmentWindowKey", "x");
-            configDataKey = GetPreferences("Config", "DataWindowKey", "c");
+            configWindowKey = GetPreferences("Config", "WindowKey", "m");
+            configPlayKey = GetPreferences("Config", "PlayKey", "space");
+            configStopKey = GetPreferences("Config", "StopKey", "s");
 
-            configEffectKey = configEffectKey.ToLower();
-            configEnvironmentKey = configEnvironmentKey.ToLower();
-            configDataKey = configDataKey.ToLower();
+            configWindowKey = configWindowKey.ToLower();
+            configPlayKey = configPlayKey.ToLower();
+            configStopKey = configStopKey.ToLower();
         }
 
         /// <summary>設定ファイルから string データを読む</summary>
@@ -362,9 +368,9 @@ namespace CM3D2.Maidirector.Plugin
         private bool initialized = false;
 
         string configLanguage = string.Empty;
-        string configEffectKey = string.Empty;
-        string configEnvironmentKey = string.Empty;
-        string configDataKey = string.Empty;
+        string configWindowKey = string.Empty;
+        string configPlayKey = string.Empty;
+        string configStopKey = string.Empty;
 
         /// <summary>夜伽クラス</summary>
         YotogiPlayManager yotogiManager = null;

@@ -115,7 +115,9 @@ namespace CM3D2.Maidirector.Plugin
                 isField = false;
 
                 this.propertyBox = new CustomComboBox();
+                this.propertyBox.Text = Translation.GetText("PropertyPicker", "property");
                 this.fieldBox = new CustomComboBox();
+                this.fieldBox.Text = Translation.GetText("PropertyPicker", "field");
 
                 this.okButton = new CustomButton();
                 this.okButton.Text = Translation.GetText("UI", "ok");

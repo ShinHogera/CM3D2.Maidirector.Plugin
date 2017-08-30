@@ -139,7 +139,7 @@ namespace CM3D2.Maidirector.Plugin
             Rect rect = new Rect(0, 0, 25, 15);
             if (GUI.Button(rect, "+"))
             {
-                GlobalPropertyPicker.Set(new Vector2(100, 100), 200, 12, this.component, (pr, fi) =>
+                GlobalPropertyPicker.Set(new Vector2(400, 400), 200, 12, this.component, (pr, fi) =>
                         {
                             if(pr == null)
                                 this.AddProp(new MovieProperty(fi));

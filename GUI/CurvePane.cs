@@ -25,7 +25,9 @@ namespace CM3D2.Maidirector.Plugin
         private int selectedTrackIndex = -1;
 
         private static readonly string[] CURVE_WRAP_TYPES = Enum.GetNames(typeof(WrapMode));
-        private static readonly string[] TANGENT_MODES = Enum.GetNames(typeof(TangentUtility.TangentMode));
+        private static readonly string[] CURVE_DETAIL_PANEL_MODES = Translation.GetEnum(typeof(CurveDetailPanelMode));
+        private static readonly string[] TANGENT_MODES = Translation.GetEnum(typeof(TangentUtility.TangentMode));
+
         private CustomComboBox wrapBeforeBox;
         private CustomComboBox wrapAfterBox;
         private GUIStyle gsText;
@@ -62,8 +64,6 @@ namespace CM3D2.Maidirector.Plugin
         {
             get => pos + (scale / 2);
         }
-
-        private static readonly string[] CURVE_DETAIL_PANEL_MODES = Enum.GetNames(typeof(CurveDetailPanelMode));
 
         public CurvePane()
         {
@@ -388,28 +388,12 @@ namespace CM3D2.Maidirector.Plugin
             }
 
             rectItem.x = 0;
-            rectItem.width = panelRect.width / 2;
-            rectItem.y += rectItem.height;
-
-            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "center")))
-            {
-                this.CenterSelectedCurve(clip);
-            }
-
-            rectItem.x += rectItem.width;
-
-            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "fitAll")))
-            {
-                this.FitAllCurves(clip);
-            }
-
-            rectItem.x = 0;
             rectItem.y += rectItem.height;
             rectItem.width = panelRect.width / 2;
 
             using( GUIColor color = new GUIColor( GUI.backgroundColor, CurveTexture.GetCurveColor(selectedKeyframeCurveIndex) ) )
             {
-                GUI.Label(rectItem, $"Translation.GetText(\"CurvePane\", \"selectedCurve\"): {clip.curves[selectedKeyframeCurveIndex].name}");
+                GUI.Label(rectItem, Translation.GetText("CurvePane", "selectedCurve") + ": " + clip.curves[selectedKeyframeCurveIndex].name);
             }
 
             rectItem.x += rectItem.width;
@@ -433,6 +417,22 @@ namespace CM3D2.Maidirector.Plugin
                     this.selectedKeyframeCurveIndex++;
 
                 this.SelectKeyframe(this.selectedKeyframeCurveIndex, 0);
+            }
+
+            rectItem.x = 0;
+            rectItem.width = panelRect.width / 2;
+            rectItem.y += rectItem.height;
+
+            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "center")))
+            {
+                this.CenterSelectedCurve(clip);
+            }
+
+            rectItem.x += rectItem.width;
+
+            if(GUI.Button(rectItem, Translation.GetText("CurvePane", "fitAll")))
+            {
+                this.FitAllCurves(clip);
             }
 
             rectItem.x = 0;

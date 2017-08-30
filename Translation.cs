@@ -20,12 +20,8 @@ namespace CM3D2.Maidirector.Plugin
         private static string _currentTranslation;
         public static string CurrentTranslation
         {
-            get {
-                return _currentTranslation;
-            }
-            set {
-                _currentTranslation = value;
-            }
+            get => _currentTranslation;
+            set => _currentTranslation = value;
         }
 
         public static void Initialize( string language )
@@ -63,15 +59,9 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
-        public static string[] GetTranslations()
-        {
-            return translations.Keys.ToArray();
-        }
+        public static string[] GetTranslations() => translations.Keys.ToArray();
 
-        public static bool HasTranslation( string translation )
-        {
-            return translations.ContainsKey(translation);
-        }
+        public static bool HasTranslation( string translation ) => translations.ContainsKey(translation);
 
         public static string GetText(string category, string field)
         {
@@ -88,5 +78,8 @@ namespace CM3D2.Maidirector.Plugin
             }
             return translations[ CurrentTranslation ][ key ];
         }
+
+        public static string[] GetEnum(Type type) =>
+            Enum.GetNames(type).Select(n => Translation.GetText("Enum", n)).ToArray();
     }
 }
