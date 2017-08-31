@@ -82,16 +82,6 @@ namespace CM3D2.Maidirector.Plugin
                         }
                     }
 
-                    if (this.timelineWindow != null && this.timelineWindow.curvePane.wantsLoad)
-                    {
-                        // TODO: make cleaner
-                        string loadPath = this.timelineWindow.GetSavePath("test");
-                        XDocument doc = XDocument.Load(loadPath);
-                        Deserialize.DeserializeTake(doc, ref this.timelineWindow);
-                        this.timelineWindow.curvePane.wantsLoad = false;
-                    }
-
-
                     if(this.timelineWindow != null && this.timelineWindow.wantsLanguageChange)
                     {
                         string lang = this.timelineWindow.LanguageValue;

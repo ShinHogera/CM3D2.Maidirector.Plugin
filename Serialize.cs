@@ -17,16 +17,25 @@ namespace CM3D2.Maidirector.Plugin
 {
     internal static class Serialize
     {
+        private readonly static string SAVE_DIR = ConstantValues.ConfigDir + @"\Saves";
+        public static string GetSavePath(string name)
+        {
+            Directory.CreateDirectory(SAVE_DIR);
+            return SAVE_DIR + @"\" + name + ".xml";
+        }
+
         internal static string SerializeIntList(List<int> list) => string.Join(",", list.Select(x => x.ToString()).ToArray());
 
         internal static XElement SerializeKeyframe(Keyframe key, int tangentMode)
         {
             XElement elem = new XElement("Keyframe");
+
             elem.SetAttributeValue("time", key.time);
             elem.SetAttributeValue("value", key.value);
             elem.SetAttributeValue("inTangent", key.inTangent);
             elem.SetAttributeValue("outTangent", key.outTangent);
             elem.SetAttributeValue("tangentMode", tangentMode);
+
             return elem;
         }
 
@@ -48,7 +57,6 @@ namespace CM3D2.Maidirector.Plugin
             XElement elem = new XElement("MovieCurveClip",
                                          from curve in clip.curves
                                          select SerializeCurve(curve));
-
 
             elem.SetAttributeValue("frame", clip.frame);
             elem.SetAttributeValue("length", clip.length);
@@ -72,6 +80,7 @@ namespace CM3D2.Maidirector.Plugin
         internal static XElement SerializeMaidAnimationTrack(MovieMaidAnimationTrack track)
         {
             XElement elem = new XElement("MovieMaidAnimationTrack", SerializeCurveTrackClips(track));
+
             elem.SetAttributeValue("maidGuid", track.maid.Param.status.guid);
             elem.SetAttributeValue("animId", track.animation.id);
 
@@ -107,8 +116,7 @@ namespace CM3D2.Maidirector.Plugin
 
         internal static XElement SerializeMovieProperties(MoviePropertyTrack track) =>
             new XElement("Properties",
-                         track.propsToChange.Select((prop, i) => SerializeMovieProperty(prop, track.GetCurveIdxesForProp(i)))
-                         );
+                         track.propsToChange.Select((prop, i) => SerializeMovieProperty(prop, track.GetCurveIdxesForProp(i))));
 
         internal static XElement SerializePropertyTrack(MoviePropertyTrack track)
         {
@@ -144,8 +152,18 @@ namespace CM3D2.Maidirector.Plugin
                             from track in tracks
                             select SerializeTrack(track));
 
-        internal static XDocument SerializeTake(TimelineWindow win)
+        internal static XElement SerializeEnvironment()
+        {
+            XElement elem = new XElement("Environment");
+
+            elem.SetAttributeValue("background", GameMain.Instance.BgMgr.GetBGName());
+
+            return elem;
+        }
+
+        internal static XDocument SerializeTake(MovieTake take)
             => new XDocument(new XElement("Take",
-                                          SerializeTracks(win.tracks)));
+                                          SerializeTracks(take.tracks),
+                                          SerializeEnvironment()));
     }
 }

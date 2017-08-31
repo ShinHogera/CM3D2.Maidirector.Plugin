@@ -38,6 +38,8 @@ namespace CM3D2.Maidirector.Plugin
                     {
                         new Keyframe(0f, value),
                     });
+            curve.preWrapMode = WrapMode.ClampForever;
+            curve.postWrapMode = WrapMode.ClampForever;
 
             this.tangentModes = new List<int>();
             this.tangentModes.Add(0);

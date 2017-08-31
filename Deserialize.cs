@@ -17,10 +17,13 @@ namespace CM3D2.Maidirector.Plugin
 {
     internal static class Deserialize
     {
-        internal static string[] GetMaidGuids(XDocument doc)
-        {
-            return null;
-        }
+        internal static string GetSavePath(string saveName) => "";
+
+        internal static List<string> GetMaidGuids(XDocument doc) =>
+            doc.Descendants()
+            .Where(desc => desc.Attribute("maidGuid") != null)
+            .Select(desc => desc.Attribute("maidGuid").Value)
+            .ToList();
 
         internal static float GetFloatAttr(XElement element, string name)
         {
@@ -61,7 +64,7 @@ namespace CM3D2.Maidirector.Plugin
         internal static Maid FindMaid(string maidGuid)
         {
             var results = GameMain.Instance.CharacterMgr.GetStockMaidList()
-                .Select((m, i) => new { M=m, I=i})
+                .Select((m, i) => new { M=m, I=i })
                 .Where(v => v.M.Param.status.guid == maidGuid)
                 .Select(v => v.I)
                 .ToList();
@@ -131,7 +134,9 @@ namespace CM3D2.Maidirector.Plugin
         internal static MovieCameraTargetTrack DeserializeCameraTargetTrack(XElement elem)
         {
             MovieCameraTargetTrack track = new MovieCameraTargetTrack();
+
             track.clips = DeserializeCurveClips(elem);
+
             return track;
         }
 
@@ -148,6 +153,7 @@ namespace CM3D2.Maidirector.Plugin
 
                 MovieMaidAnimationTrack track = new MovieMaidAnimationTrack(maid, animationId);
                 track.clips = DeserializeCurveClips(elem);
+
                 return track;
             }
             catch(Exception e)
@@ -182,8 +188,6 @@ namespace CM3D2.Maidirector.Plugin
         {
             bool isField = elem.Attribute("type").Value == "field";
             string propName = elem.Attribute("name").Value;
-
-            Debug.Log($"{propName} {isField} {componentType}");
 
             MovieProperty prop = null;
             if(isField)
@@ -267,7 +271,19 @@ namespace CM3D2.Maidirector.Plugin
              select DeserializeTrack(e))
             .ToList();
 
-        internal static void DeserializeTake(XDocument doc, ref TimelineWindow win) =>
-            win.tracks = DeserializeTracks(doc.Element("Take"));
+        internal static void DeserializeEnvironment(XElement elem) =>
+            GameMain.Instance.BgMgr.ChangeBg( elem.Element("Environment").Attribute("background").Value);
+
+        internal static MovieTake DeserializeTake(XDocument doc)
+        {
+            XElement elem = doc.Element("Take");
+
+            DeserializeEnvironment(elem);
+
+            MovieTake take = new MovieTake();
+            take.tracks = DeserializeTracks(elem);
+
+            return take;
+        }
     }
 }

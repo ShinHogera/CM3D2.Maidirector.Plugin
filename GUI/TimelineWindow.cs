@@ -21,7 +21,7 @@ namespace CM3D2.Maidirector.Plugin
 
         public TimelineWindow(int fontSize, int id) : base(fontSize, id)
         {
-            this.tracks = new List<MovieTrack>();
+            this.take = new MovieTake();
             this.dragging = new List<bool>();
             this.dragMode = DragMode.Drag;
 
@@ -38,7 +38,7 @@ namespace CM3D2.Maidirector.Plugin
             //    var clip = new MovieCurveClip(i * 60, 60);
             //    existing.AddClip(clip);
             //    this.dragging.Add(false);
-            //    this.tracks.Add(existing);
+            //    this.take.Add(existing);
             //}
         }
 
@@ -79,6 +79,9 @@ namespace CM3D2.Maidirector.Plugin
 
                 this.curvePane = new CurvePane();
                 this.ChildControls.Add(this.curvePane);
+
+                this.maidLoader = new MaidLoader();
+
             }
             catch (Exception e)
             {
@@ -92,6 +95,11 @@ namespace CM3D2.Maidirector.Plugin
         {
             try
             {
+                GUI.enabled = this.GuiEnabled;
+
+                if(!this.maidLoader.IsInitted)
+                    this.maidLoader.Init();
+
                 float seek = this.seekerPos + PANEL_WIDTH - this.scrollPosition.x;
                 Rect seekerRect = new Rect(ControlBase.FixedMargin + seek, 0, 20, 40);
 
@@ -112,9 +120,9 @@ namespace CM3D2.Maidirector.Plugin
                 Rect trackPanelRect = new Rect(0, ControlBase.FixedMargin + 20, PANEL_WIDTH, 400 - ControlBase.FixedMargin * 4);
 
                 GUILayout.BeginArea(trackPanelRect);
-                for(int i = 0; i < this.tracks.Count; i++)
+                for(int i = 0; i < this.take.tracks.Count; i++)
                 {
-                    MovieTrack track = this.tracks[i];
+                    MovieTrack track = this.take.tracks[i];
                     Rect panel = new Rect(0,
                                           this.scrollPosition.y + (this.ControlHeight * 2 * i),
                                           PANEL_WIDTH - 150,
@@ -133,7 +141,7 @@ namespace CM3D2.Maidirector.Plugin
                     style.alignment = TextAnchor.MiddleLeft;
                     panel.x = PANEL_WIDTH - 150 + ControlBase.FixedMargin;
                     panel.width = 150 - ControlBase.FixedMargin * 2;
-                    GUI.Label(panel, this.tracks[i].GetName(), style);
+                    GUI.Label(panel, this.take.tracks[i].GetName(), style);
                 }
                 GUILayout.EndArea();
 
@@ -143,21 +151,21 @@ namespace CM3D2.Maidirector.Plugin
                 this.scrollPosition = GUI.BeginScrollView(rectScroll, this.scrollPosition, rectScrollView);
 
 
-                for(int i = this.tracks.Count - 1; i >= 0; i--)
+                for(int i = this.take.tracks.Count - 1; i >= 0; i--)
                 {
-                    if(this.tracks[i].wantsDelete)
+                    if(this.take.tracks[i].wantsDelete)
                     {
                         // reset to the value at the beginning of the track, instead of in the middle
-                        this.tracks[i].PreviewTime(0f);
-                        this.tracks.RemoveAt(i);
+                        this.take.tracks[i].PreviewTime(0f);
+                        this.take.tracks.RemoveAt(i);
                     }
                 }
-                for (int i = 0; i < this.tracks.Count; i++)
+                for (int i = 0; i < this.take.tracks.Count; i++)
                 {
                     this.drawTrack(i);
                 }
 
-                guiScrollHeight = (this.tracks.Count) * this.ControlHeight * 2;
+                guiScrollHeight = (this.take.tracks.Count) * this.ControlHeight * 2;
                 GUI.EndScrollView();
 
                 Rect lineRect = new Rect(ControlBase.FixedMargin + seek, 0, 1, 400);
@@ -228,7 +236,7 @@ namespace CM3D2.Maidirector.Plugin
 
                 GUI.BeginGroup(curveRect);
                 if (this.ClipIsSelected())
-                    this.curvePane.Draw(curveRect, this.rectGui, this.tracks[this.selectedTrackIndex].clips, this.selectedClipIndex, this.selectedTrackIndex);
+                    this.curvePane.Draw(curveRect, this.rectGui, this.take.tracks[this.selectedTrackIndex].clips, this.selectedClipIndex, this.selectedTrackIndex);
                 GUI.EndGroup();
                 if (this.curvePane.needsUpdate)
                 {
@@ -236,11 +244,23 @@ namespace CM3D2.Maidirector.Plugin
                 }
                 if (this.curvePane.wantsSave)
                 {
-                    Directory.CreateDirectory(SAVE_DIR);
-                    XDocument doc = Serialize.SerializeTake(this);
-                    string savePath = GetSavePath("test");
+                    string savePath = Serialize.GetSavePath("test");
+                    XDocument doc = Serialize.SerializeTake(this.take);
                     doc.Save(savePath);
                     this.curvePane.wantsSave = false;
+                }
+                if (this.curvePane.wantsLoad)
+                {
+                    // TODO: make cleaner
+                    string loadPath = Serialize.GetSavePath("test");
+                    XDocument doc = XDocument.Load(loadPath);
+
+                    List<string> guids = Deserialize.GetMaidGuids(doc);
+                    this.maidLoader.SelectMaidsWithGuids(guids);
+                    this.maidLoader.onMaidsLoaded = () => this.take = Deserialize.DeserializeTake(doc);
+                    this.maidLoader.StartLoad();
+
+                    this.curvePane.wantsLoad = false;
                 }
 
                 {
@@ -266,20 +286,14 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
-        private readonly static string SAVE_DIR = ConstantValues.ConfigDir + @"\Saves";
-        public string GetSavePath(string name)
-        {
-            return SAVE_DIR + @"\" + name + ".xml";
-        }
-
         private bool ClipIsSelected()
         {
-            return this.tracks.Count > 0 &&
-                this.selectedTrackIndex < this.tracks.Count &&
-                this.selectedClipIndex < this.tracks[this.selectedTrackIndex].clips.Count;
+            return this.take.tracks.Count > 0 &&
+                this.selectedTrackIndex < this.take.tracks.Count &&
+                this.selectedClipIndex < this.take.tracks[this.selectedTrackIndex].clips.Count;
         }
 
-        private void FollowCursor()
+        private void FollowSeeker()
         {
             float range = this.rectGui.width / 2;
             float seek = (this.seekerPos) + PANEL_WIDTH;
@@ -299,35 +313,35 @@ namespace CM3D2.Maidirector.Plugin
 
         public override void Update()
         {
+            this.maidLoader.Update();
+
             if (this.isPlaying)
             {
-                foreach (MovieTrack track in this.tracks)
+                foreach (MovieTrack track in this.take.tracks)
                 {
                     track.PreviewTime(this.playTime);
                 }
                 this.playTime += Time.deltaTime;
 
-                this.FollowCursor();
+                this.FollowSeeker();
             }
             else
             {
                 if (this.updated)
                 {
                     this.updated = false;
-                    foreach (MovieTrack track in this.tracks)
+                    foreach (MovieTrack track in this.take.tracks)
                     {
                         track.PreviewTime(this.currentFrame / framesPerSecond);
                     }
 
-                    if(this.tracks.Count == 0)
+                    if(this.take.tracks.Count == 0)
                         this.guiScrollWidth = 300;
                     else
-                        this.guiScrollWidth = TakeEndFrame();
+                        this.guiScrollWidth = this.take.GetEndFrame();
                 }
             }
         }
-
-        private int TakeEndFrame() => (int)(this.tracks.OrderByDescending(track => track.endTime).First().endTime + 300);
 
         public void Play(object sender, EventArgs args)
         {
@@ -349,7 +363,7 @@ namespace CM3D2.Maidirector.Plugin
             GlobalComponentPicker.Set(new Vector2(this.rectGui.x + 250, this.rectGui.y - 20), 250, this.FontSize, (existing) =>
                     {
                         existing.InsertNewClip();
-                        this.tracks.Add(existing);
+                        this.take.tracks.Add(existing);
                         this.curvePane.SetUpdate();
                     });
         }
@@ -359,7 +373,7 @@ namespace CM3D2.Maidirector.Plugin
             if(!this.ClipIsSelected())
                 return;
 
-            this.tracks[this.selectedTrackIndex].CopyClip(this.selectedClipIndex);
+            this.take.tracks[this.selectedTrackIndex].CopyClip(this.selectedClipIndex);
             this.updated = true;
         }
 
@@ -368,7 +382,7 @@ namespace CM3D2.Maidirector.Plugin
             if(!this.ClipIsSelected())
                 return;
 
-            this.tracks[this.selectedTrackIndex].DeleteClip(this.selectedClipIndex);
+            this.take.tracks[this.selectedTrackIndex].DeleteClip(this.selectedClipIndex);
             this.updated = true;
         }
 
@@ -378,10 +392,10 @@ namespace CM3D2.Maidirector.Plugin
 
             GUI.Box(rect, "");
             GUILayout.BeginArea(rect);
-            for (int i = 0; i < this.tracks[index].clips.Count; i++)
+            for (int i = 0; i < this.take.tracks[index].clips.Count; i++)
             {
-                MovieCurveClip asd = this.tracks[index].clips[i];
-                this.drawClip(ref asd, this.tracks[index], index, i);
+                MovieCurveClip asd = this.take.tracks[index].clips[i];
+                this.drawClip(ref asd, this.take.tracks[index], index, i);
             }
             GUILayout.EndArea();
         }
@@ -516,6 +530,11 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
+        public bool GuiEnabled
+        {
+            get => this.maidLoader != null && this.maidLoader.enableGui;
+        }
+
         public bool wantsLanguageChange { get; set; }
 
         private CustomButton playButton = null;
@@ -528,7 +547,9 @@ namespace CM3D2.Maidirector.Plugin
 
         private Texture2D lineTexture = null;
 
-        public List<MovieTrack> tracks;
+        private MaidLoader maidLoader;
+
+        private MovieTake take;
         private List<bool> dragging;
         private bool draggingSeeker;
         private bool updated = false;
