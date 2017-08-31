@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
@@ -80,6 +81,16 @@ namespace CM3D2.Maidirector.Plugin
                             this.initialized = true;
                         }
                     }
+
+                    if (this.timelineWindow != null && this.timelineWindow.curvePane.wantsLoad)
+                    {
+                        // TODO: make cleaner
+                        string loadPath = this.timelineWindow.GetSavePath("test");
+                        XDocument doc = XDocument.Load(loadPath);
+                        Deserialize.DeserializeTake(doc, ref this.timelineWindow);
+                        this.timelineWindow.curvePane.wantsLoad = false;
+                    }
+
 
                     if(this.timelineWindow != null && this.timelineWindow.wantsLanguageChange)
                     {

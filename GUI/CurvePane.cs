@@ -43,7 +43,8 @@ namespace CM3D2.Maidirector.Plugin
         public enum CurvePaneMode
         {
             Curve,
-            Keyframe
+            Keyframe,
+            Data
         }
 
         private CurveDetailPanelMode curveDetailPanelMode { get; set; }
@@ -790,6 +791,22 @@ namespace CM3D2.Maidirector.Plugin
             this.keyframeDetailPanel(curveRect, keyframeViewRect, ref clip);
         }
 
+        public bool wantsSave { get; set; }
+        public bool wantsLoad { get; set; }
+        private void DrawDataView(Rect viewRect)
+        {
+            Rect dataViewRect = new Rect(0, 0, viewRect.width / 4 * 3, viewRect.height/2);
+            if(GUI.Button(dataViewRect, "Save"))
+            {
+                this.wantsSave = true;
+            }
+            dataViewRect.y += dataViewRect.height;
+            if(GUI.Button(dataViewRect, "Load"))
+            {
+                this.wantsLoad = true;
+            }
+        }
+
         private void RefreshSelectedClip(ref MovieCurveClip clip, int clipIndex, int trackIndex)
         {
             this.UpdateFromClip(clip, true);
@@ -855,15 +872,18 @@ namespace CM3D2.Maidirector.Plugin
             clip.RemakeTexture();
         }
 
-        private void DrawView(Rect curveRect, ref MovieCurveClip clip)
+        private void DrawView(Rect viewRect, ref MovieCurveClip clip)
         {
             switch(this.mode)
             {
                 case CurvePaneMode.Curve:
-                    this.DrawCurveView(curveRect, ref clip);
+                    this.DrawCurveView(viewRect, ref clip);
                     break;
                 case CurvePaneMode.Keyframe:
-                    this.DrawKeyframeView(curveRect, ref clip);
+                    this.DrawKeyframeView(viewRect, ref clip);
+                    break;
+                case CurvePaneMode.Data:
+                    this.DrawDataView(viewRect);
                     break;
             }
         }

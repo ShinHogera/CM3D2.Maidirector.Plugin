@@ -12,8 +12,8 @@ namespace CM3D2.Maidirector.Plugin
 {
     public class MoviePropertyTrack : MovieTrack
     {
-        List<MovieProperty> propsToChange;
-        Dictionary<int, List<int>> propIdxToCurveIdxes;
+        public List<MovieProperty> propsToChange;
+        public Dictionary<int, List<int>> propIdxToCurveIdxes;
         public GameObject target;
         public Component component;
 
@@ -35,6 +35,8 @@ namespace CM3D2.Maidirector.Plugin
             this.target = go;
             this.component = c;
         }
+
+        public List<int> GetCurveIdxesForProp(int index) => this.propIdxToCurveIdxes[index];
 
         public override string GetName() => $"{target.name}: {this.component.GetType().Name}";
 
@@ -159,7 +161,7 @@ namespace CM3D2.Maidirector.Plugin
         {
             get
             {
-                if(this.fieldToChange != null)
+                if(this.IsField())
                     return this.fieldToChange.Name;
 
                 return this.propToChange.Name;
@@ -193,7 +195,7 @@ namespace CM3D2.Maidirector.Plugin
 
         public void SetValue(object target, float[] values)
         {
-            if(this.fieldToChange != null)
+            if(this.IsField())
                 this.SetFieldValue(target, values);
             else
                 this.SetPropValue(target, values);
@@ -201,11 +203,21 @@ namespace CM3D2.Maidirector.Plugin
 
         public float[] GetValues(object target)
         {
-            if(this.fieldToChange != null)
+            if(this.IsField())
                 return this.GetFieldValues(target);
             else
                 return this.GetPropValues(target);
         }
+
+        public Type GetPropType()
+        {
+            if(this.IsField())
+                return this.fieldToChange.FieldType;
+            else
+                return this.propToChange.PropertyType;
+        }
+
+        public bool IsField() => this.fieldToChange != null;
 
         private void SetPropValue(object target, float[] values)
         {

@@ -16,12 +16,20 @@ namespace CM3D2.Maidirector.Plugin
         public PhotoMotionData animation;
         public string animationName;
 
+        public MovieMaidAnimationTrack(Maid maid, int animationId)
+        {
+            this.maid = maid;
+            this.animationTarget = maid.body0.m_Bones.GetComponent<Animation>();
+            this.animation = PhotoMotionData.data.Where(d => d.id == animationId).First();
+            this.animationName = LoadAnimation(this.animation, this.maid);
+        }
+
         public MovieMaidAnimationTrack(Maid maid, PhotoMotionData data) : base()
         {
             this.maid = maid;
             this.animationTarget = maid.body0.m_Bones.GetComponent<Animation>();
             this.animation = data;
-            this.animationName = LoadAnimation(data, this.maid);
+            this.animationName = LoadAnimation(this.animation, this.maid);
         }
 
         public override string GetName() => Translation.GetText("UI", "animation") + ": " + this.maid.name;

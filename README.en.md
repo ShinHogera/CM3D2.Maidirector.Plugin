@@ -34,7 +34,7 @@ To resize tracks, press the `Resize` toggle and drag the clip you want to resize
 ### Curve View
 Here you can manipulate keyframes bound to the parameters of the selected clip by dragging the keyframe handles. Explanations of the other controls:
 
-- `-`/`+` - Zoom in and out.
+- `+`/`-` - Zoom in and out.
 - `▲`/`▼` - Pan the view up and down.
 - `◀`/`▶` - Select the previous/next curve.
 - `Center` - Fit the selected curve to the curve window.

@@ -65,7 +65,7 @@ namespace CM3D2.Maidirector.Plugin
             get => this.curves.OrderBy(curve => curve.minValue).First().minValue;
         }
 
-        public MovieCurveClip(int frame, int length)
+        public MovieCurveClip()
         {
             this.curves = new List<MovieCurve>();
 
@@ -79,10 +79,13 @@ namespace CM3D2.Maidirector.Plugin
                 curveTexture.SetPixels(color);
                 curveTexture.Apply();
             }
+            this.heldFrames = 0;
+        }
 
+        public MovieCurveClip(int frame, int length) : this()
+        {
             this.frame = frame;
             this.length = length;
-            this.heldFrames = 0;
         }
 
         public MovieCurveClip(MovieCurveClip other)

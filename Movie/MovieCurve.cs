@@ -15,7 +15,7 @@ namespace CM3D2.Maidirector.Plugin
             get => this.curve.keys;
         }
 
-        private List<int> tangentModes;
+        public List<int> tangentModes;
 
         private int length;
         public string name;
@@ -23,6 +23,11 @@ namespace CM3D2.Maidirector.Plugin
         private int keyframeCount
         {
             get => this.keyframes.Count();
+        }
+
+        public MovieCurve()
+        {
+            this.tangentModes = new List<int>();
         }
 
         public MovieCurve(int length, float value, string name)

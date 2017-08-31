@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Xml.Linq;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
@@ -233,6 +234,14 @@ namespace CM3D2.Maidirector.Plugin
                 {
                     this.updated = true;
                 }
+                if (this.curvePane.wantsSave)
+                {
+                    Directory.CreateDirectory(SAVE_DIR);
+                    XDocument doc = Serialize.SerializeTake(this);
+                    string savePath = GetSavePath("test");
+                    doc.Save(savePath);
+                    this.curvePane.wantsSave = false;
+                }
 
                 {
                     Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
@@ -255,6 +264,12 @@ namespace CM3D2.Maidirector.Plugin
             {
                 Debug.LogError(e);
             }
+        }
+
+        private readonly static string SAVE_DIR = ConstantValues.ConfigDir + @"\Saves";
+        public string GetSavePath(string name)
+        {
+            return SAVE_DIR + @"\" + name + ".xml";
         }
 
         private bool ClipIsSelected()
@@ -471,7 +486,8 @@ namespace CM3D2.Maidirector.Plugin
         private static readonly string[] CURVE_PANE_MODES = new string[]
             {
                 Translation.GetText("Timeline", "curve"),
-                Translation.GetText("Timeline", "keyframe")
+                Translation.GetText("Timeline", "keyframe"),
+                "Data"// Translation.GetText("Timeline", "data")
             };
 
         private bool isPlaying;
@@ -508,11 +524,11 @@ namespace CM3D2.Maidirector.Plugin
         private CustomButton copyClipButton = null;
         private CustomButton deleteClipButton = null;
         private CustomComboBox languageBox = null;
-        private CurvePane curvePane;
+        public CurvePane curvePane;
 
         private Texture2D lineTexture = null;
 
-        private List<MovieTrack> tracks;
+        public List<MovieTrack> tracks;
         private List<bool> dragging;
         private bool draggingSeeker;
         private bool updated = false;
