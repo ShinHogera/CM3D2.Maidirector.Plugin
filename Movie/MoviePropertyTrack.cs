@@ -49,7 +49,11 @@ namespace CM3D2.Maidirector.Plugin
 
         public List<int> GetCurveIdxesForProp(int index) => this.propIdxToCurveIdxes[index];
 
-        public override string GetName() => $"{this.targetName}: {this.componentTypeName}";
+        public override string GetName()
+        {
+            string compoName = Translation.TryGetText("Component", componentTypeName);
+            return $"{targetName}: {compoName}";
+        }
 
         public void AddProp(MovieProperty movieProp)
         {
