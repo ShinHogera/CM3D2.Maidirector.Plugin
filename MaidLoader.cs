@@ -47,13 +47,13 @@ namespace CM3D2.Maidirector.Plugin
             this.defaultPose = PhotoMotionData.data.Where(d => !d.is_mod && !d.is_mypose && !string.IsNullOrEmpty(d.direct_file)).First().direct_file;
 
             this.selectList = new List<int>();
-            this.selectList.Add(0);
-            this.selectList.Add(1);
-            this.selectList.Add(2);
-            this.selectList.Add(3);
-            this.selectList.Add(4);
-            this.selectList.Add(5);
-            this.selectList.Add(6);
+            // this.selectList.Add(0);
+            // this.selectList.Add(1);
+            // this.selectList.Add(2);
+            // this.selectList.Add(3);
+            // this.selectList.Add(4);
+            // this.selectList.Add(5);
+            // this.selectList.Add(6);
 
             this.BuildMaidArrays();
         }
@@ -113,15 +113,23 @@ namespace CM3D2.Maidirector.Plugin
                 characterMgr.GetStockMaidList()[index].Visible = false;
         }
 
+        private void ClearPlacementWindow()
+        {
+            GameObject placementWindow = GameObject.Find("PlacementWindow");
+            if(placementWindow == null)
+                return;
+
+            PlacementWindow placementWindowCompo = placementWindow.GetComponent<PlacementWindow>();
+
+            placementWindowCompo.OnReset();
+        }
 
         public void StartLoad()
         {
             this.isLoadMaid = true;
 
+            this.ClearPlacementWindow();
             this.ClearMaids();
-
-            // TODO: photo mode compat
-            // PlacementWindow.DeActiveMaid
 
             this.isFadeOut = true;
             GameMain.Instance.MainCamera.FadeOut(0.0f, false, null, true);
@@ -149,6 +157,7 @@ namespace CM3D2.Maidirector.Plugin
                 this.maidArray[index].AllProcPropSeqStart();
             }
             this.maidArray[index].Visible = true;
+            LoadMaidActivate(index, this.selectList[index]);
         }
 
         private void LoadMaidActivate(int index, int a)
@@ -168,7 +177,7 @@ namespace CM3D2.Maidirector.Plugin
                 {
                     this.LoadMaidFull(index);
                 }
-                else if (this.IsEditMode() || (index == 0 && (int) this.selectList[index] == 0))
+                else if (!this.IsEditMode() || (index == 0 && (int) this.selectList[index] == 0))
                 {
                     this.LoadMaidActivate(index, this.selectList[index]);
                 }
@@ -201,6 +210,8 @@ namespace CM3D2.Maidirector.Plugin
             {
                 bool shouldLoad = !Enumerable.Range(0, this.maxMaidCnt).Any(IsMaidBusy);
 
+                bool finished = Enumerable.Range(0, this.selectList.Count).All(index => this.maidArray[index] != null && this.maidArray[index].body0.isLoadedBody);
+
                 if(shouldLoad)
                 {
                     for(int i = 0; i < this.selectList.Count; i++)
@@ -208,7 +219,31 @@ namespace CM3D2.Maidirector.Plugin
                         this.TryLoadMaid(i);
                     }
                 }
-                this.isLoadMaid = false;
+
+                Debug.Log("=== Start");
+                Debug.Log(this.maidArray.Length);
+                Debug.Log("=== Mid");
+                for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
+                {
+                    Maid maid = characterMgr.GetStockMaidList()[i];
+                    Debug.Log($"{i} {maid}");
+                    if(maid != null)
+                        Debug.Log($"{maid.Param.status.guid}");
+                }
+                Debug.Log("=== Maid");
+                for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
+                {
+                    Maid maid = maidArray[i];
+                    Debug.Log($"{i} {maid}");
+                    if(maid != null)
+                        Debug.Log($"{maid.Param.status.guid} {maid.body0.isLoadedBody}");
+                }
+                Debug.Log("=== End");
+                if(finished)
+                {
+                    Debug.Log("FINISH");
+                    this.isLoadMaid = false;
+                }
             }
         }
 
@@ -269,10 +304,18 @@ namespace CM3D2.Maidirector.Plugin
             this.MaidUpdate();
             if(this.isFadeOut)
             {
-                bool maidsFinishedLoading = !Enumerable.Range(0, this.maxMaidCnt).Any(i => IsMaidBusy(i) || IsMaidProcPropBusy(i));
+                bool maidsFinishedLoading = !Enumerable.Range(0, this.maxMaidCnt).Any(i => IsMaidBusy(i) || IsMaidProcPropBusy(i))
+                    && !this.isLoadMaid;
 
                 if(maidsFinishedLoading)
                 {
+                    for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
+                    {
+                        Maid maid = maidArray[i];
+                        Debug.Log($"{i} {maid}");
+                        if(maid != null)
+                            Debug.Log($"{maid.Param.status.guid} {maid.body0.isLoadedBody}");
+                    }
                     if(!this.isBusyInit)
                     {
                         this.isBusyInit = true;

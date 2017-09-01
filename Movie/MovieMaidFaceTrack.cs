@@ -119,6 +119,18 @@ namespace CM3D2.Maidirector.Plugin
 
         public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
         {
+            if(this.maid == null || !this.maid.Visible)
+            {
+                Debug.LogWarning(Translation.GetText("Warnings", "maidNotFound"));
+                this.enabled = false;
+                return;
+            }
+
+            if(this.targetMorph == null)
+            {
+                 this.targetMorph = maid.body0.Face.morph;
+            }
+
             maid.boMabataki = false;
             maid.boFaceAnime = false;
             for(int i = 0; i < clip.curves.Count; i++)

@@ -46,8 +46,8 @@ namespace CM3D2.Maidirector.Plugin
 
 
             elem.SetAttributeValue("name", curve.name);
-            elem.SetAttributeValue("preWrapMode", curve.curve.preWrapMode);
-            elem.SetAttributeValue("postWrapMode", curve.curve.postWrapMode);
+            elem.SetAttributeValue("preWrapMode", (int)curve.curve.preWrapMode);
+            elem.SetAttributeValue("postWrapMode", (int)curve.curve.postWrapMode);
 
             return elem;
         }

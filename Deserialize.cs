@@ -66,16 +66,16 @@ namespace CM3D2.Maidirector.Plugin
             var results = GameMain.Instance.CharacterMgr.GetStockMaidList()
                 .Select((m, i) => new { M=m, I=i })
                 .Where(v => v.M.Param.status.guid == maidGuid)
-                .Select(v => v.I)
+                .Select(v => v.M)
                 .ToList();
 
             if(results.Count == 0)
                 return null;
 
-            int index = results.First();
+            Maid maid = results.First();
 
-            Maid maid = GameMain.Instance.CharacterMgr.Activate(index, index, false, false);
-            maid = GameMain.Instance.CharacterMgr.CharaVisible(index, true, false);
+            // Maid maid = GameMain.Instance.CharacterMgr.Activate(index, index, false, false);
+            // maid = GameMain.Instance.CharacterMgr.CharaVisible(index, true, false);
 
             return maid;
         }
@@ -236,6 +236,7 @@ namespace CM3D2.Maidirector.Plugin
                     propIdxToCurveIdxes[i] = curveIdxes[i];
                 }
 
+                Debug.Log("Load: " + obj + " " + compo);
                 MoviePropertyTrack track = new MoviePropertyTrack(obj, compo);
                 track.clips = DeserializeCurveClips(elem);
                 track.propsToChange = DeserializeMovieProperties(elem, componentType);
@@ -271,8 +272,14 @@ namespace CM3D2.Maidirector.Plugin
              select DeserializeTrack(e))
             .ToList();
 
-        internal static void DeserializeEnvironment(XElement elem) =>
-            GameMain.Instance.BgMgr.ChangeBg( elem.Element("Environment").Attribute("background").Value);
+        internal static void DeserializeEnvironment(XElement elem)
+        {
+            string bgVal = elem.Element("Environment").Attribute("background").Value;
+
+            // changing the background even though it's the same seems to cause a race condition?
+            if(GameMain.Instance.BgMgr.GetBGName() != bgVal)
+                GameMain.Instance.BgMgr.ChangeBg(bgVal);
+        }
 
         internal static MovieTake DeserializeTake(XDocument doc)
         {

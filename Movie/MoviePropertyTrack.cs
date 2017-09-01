@@ -18,6 +18,7 @@ namespace CM3D2.Maidirector.Plugin
         public Component component;
 
         public string targetName;
+        public string componentTypeName;
         public ObjectType targetType;
 
         public enum ObjectType
@@ -34,11 +35,22 @@ namespace CM3D2.Maidirector.Plugin
 
             this.target = go;
             this.component = c;
+
+            Debug.Log(go + " " + c);
+
+            this.targetName = this.target.name;
+            this.componentTypeName = this.component.GetType().Name;
+        }
+
+        public MoviePropertyTrack(string targetName, string componentTypeName)
+        {
+            this.targetName = targetName;
+            this.componentTypeName = componentTypeName;
         }
 
         public List<int> GetCurveIdxesForProp(int index) => this.propIdxToCurveIdxes[index];
 
-        public override string GetName() => $"{target.name}: {this.component.GetType().Name}";
+        public override string GetName() => $"{this.targetName}: {this.componentTypeName}";
 
         public void AddProp(MovieProperty movieProp)
         {
@@ -128,6 +140,24 @@ namespace CM3D2.Maidirector.Plugin
 
         public override void PreviewTimeInternal(MovieCurveClip clip, float sampleTime)
         {
+            if(this.target == null)
+            {
+                this.target = GameObject.Find(this.targetName);
+                if(this.target == null)
+                {
+                    Debug.LogWarning(Translation.GetText("Warnings", "objectNotFound"));
+                    this.enabled = false;
+                    return;
+                }
+                this.component = null;
+            }
+            if(this.component == null)
+            {
+                Debug.Log(this.componentTypeName);
+                Type type = typeof(UnityEngine.Component).Assembly.GetType(this.componentTypeName);
+                this.component = this.target.GetComponent(type);
+            }
+
             for (int i = 0; i < propsToChange.Count; i++)
             {
                 List<int> curveIdxes = this.propIdxToCurveIdxes[i];
