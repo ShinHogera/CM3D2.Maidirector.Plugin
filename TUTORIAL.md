@@ -26,7 +26,7 @@
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut2.gif)
 
-カーブを制作しました。タイムラインの上のシーカーをカーブの左にドラッグして、再生ボタンを押してください（デフォルトでスペースも使用できます）。
+カーブを制作しました。タイムラインの上のシーカーをカーブの左にドラッグして、再生ボタンを押してください（デフォルトで`スペース`も使用できます）。
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut3.gif)
 
