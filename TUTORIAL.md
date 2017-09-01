@@ -124,6 +124,6 @@
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut18.gif)
 
 ## その他
-何かが分からない時は、ぜひ聞かせてください。詳しい説明をいります。
+何かが分からない時は、ぜひ聞かせてください。詳しい説明を書きます。
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut20.gif)
