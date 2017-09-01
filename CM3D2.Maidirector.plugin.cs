@@ -75,50 +75,69 @@ namespace CM3D2.Maidirector.Plugin
             {
                 // if(this.Enable)
                 // {
-                    if (!initialized) {
+                if (!initialized) {
+                    {
+                        this.Initialize();
+                        this.initialized = true;
+                    }
+                }
+
+                if(this.timelineWindow != null && this.timelineWindow.wantsLanguageChange)
+                {
+                    string lang = this.timelineWindow.LanguageValue;
+                    if(Translation.HasTranslation(lang))
+                    {
+                        Preferences["Config"]["Language"].Value = timelineWindow.LanguageValue;
+                        configLanguage = timelineWindow.LanguageValue;
+                        SaveConfig();
+
+                        this.timelineWindow.wantsLanguageChange = false;
+                    }
+                }
+
+                if( Input.GetKeyDown( configWindowKey ) )
+                {
+                    if( this.selectedMode == ConstantValues.EditMode.Movie )
+                    {
+                        this.selectedMode = ConstantValues.EditMode.Disable;
+                    }
+                    else
+                    {
+                        this.selectedMode = ConstantValues.EditMode.Movie;
+                    }
+                }
+                else if( Input.GetKeyDown( configPlayKey ) )
+                {
+                    this.timelineWindow.Play(this, new EventArgs());
+                }
+                else if( Input.GetKeyDown( configStopKey ) )
+                {
+                    this.timelineWindow.Stop(this, new EventArgs());
+                }
+                else if( Input.GetKeyDown( configHideUIKey ) )
+                {
+                    this.enableUI = !this.enableUI;
+
+                    if(this.windowMgr == null)
+                    {
+                        GameObject placementWindow = GameObject.Find("PlacementWindow");
+                        if(placementWindow != null)
                         {
-                            this.Initialize();
-                            this.initialized = true;
+                            PlacementWindow placementWindowCompo = placementWindow.GetComponent<PlacementWindow>();
+                            this.windowMgr = placementWindowCompo.mgr;
                         }
                     }
 
-                    if(this.timelineWindow != null && this.timelineWindow.wantsLanguageChange)
+                    if(this.windowMgr != null)
                     {
-                        string lang = this.timelineWindow.LanguageValue;
-                        if(Translation.HasTranslation(lang))
-                        {
-                            Preferences["Config"]["Language"].Value = timelineWindow.LanguageValue;
-                            configLanguage = timelineWindow.LanguageValue;
-                            SaveConfig();
+                        this.SetUIEnabled(this.enableUI);
+                    }
+                }
 
-                            this.timelineWindow.wantsLanguageChange = false;
-                        }
-                    }
-
-                    if( Input.GetKeyDown( configWindowKey ) )
-                    {
-                        if( this.selectedMode == ConstantValues.EditMode.Movie )
-                        {
-                            this.selectedMode = ConstantValues.EditMode.Disable;
-                        }
-                        else
-                        {
-                            this.selectedMode = ConstantValues.EditMode.Movie;
-                        }
-                    }
-                    else if( Input.GetKeyDown( configPlayKey ) )
-                    {
-                        this.timelineWindow.Play(this, new EventArgs());
-                    }
-                    else if( Input.GetKeyDown( configStopKey ) )
-                    {
-                        this.timelineWindow.Stop(this, new EventArgs());
-                    }
-
-                    // if( this.selectedMode == ConstantValues.EditMode.Movie )
-                    // {
-                        this.timelineWindow.Update();
-                    // }
+                // if( this.selectedMode == ConstantValues.EditMode.Movie )
+                // {
+                this.timelineWindow.Update();
+                // }
                 // }
             }
             catch( Exception e )
@@ -208,6 +227,13 @@ namespace CM3D2.Maidirector.Plugin
             {
                 Debug.LogError( e.ToString() );
             }
+        }
+
+        private void SetUIEnabled(bool enable)
+        {
+            UTY.GetChildObject(this.windowMgr.gameObject, "WindowVisibleBtnsParent", false).SetActive(enable);
+            Base.SetActive(enable);
+            Gear.SetActive(enable);
         }
 
         ///-------------------------------------------------------------------------
@@ -318,10 +344,12 @@ namespace CM3D2.Maidirector.Plugin
             configWindowKey = GetPreferences("Config", "WindowKey", "m");
             configPlayKey = GetPreferences("Config", "PlayKey", "space");
             configStopKey = GetPreferences("Config", "StopKey", "s");
+            configHideUIKey = GetPreferences("Config", "HideUIKey", "delete");
 
             configWindowKey = configWindowKey.ToLower();
             configPlayKey = configPlayKey.ToLower();
             configStopKey = configStopKey.ToLower();
+            configHideUIKey = configHideUIKey.ToLower();
         }
 
         /// <summary>設定ファイルから string データを読む</summary>
@@ -375,19 +403,28 @@ namespace CM3D2.Maidirector.Plugin
         }
         #endregion
 
+        public static SystemShortcut SysShortcut { get => GameMain.Instance.SysShortcut; }
+        public static GameObject Base { get => SysShortcut.gameObject.transform.Find("Base").gameObject; }
+        public static GameObject Grid { get => Base.gameObject.transform.Find("Grid").gameObject; }
+        public static GameObject Gear { get => SysShortcut.gameObject.transform.Find("Gear").gameObject; }
+        public static UIGrid GridUI { get => Grid.GetComponent<UIGrid>(); }
+
         #region Fields
         /// <summary>画面番号</summary>
         private ConstantValues.Scene sceneNo = ConstantValues.Scene.None;
 
         private bool initialized = false;
+        private bool enableUI = true;
 
         string configLanguage = string.Empty;
         string configWindowKey = string.Empty;
         string configPlayKey = string.Empty;
         string configStopKey = string.Empty;
+        string configHideUIKey = string.Empty;
 
         /// <summary>夜伽クラス</summary>
         YotogiPlayManager yotogiManager = null;
+        private PhotoWindowManager windowMgr = null;
 
         private TimelineWindow timelineWindow = null;
         private ConstantValues.EditMode selectedMode = ConstantValues.EditMode.Disable;
