@@ -22,7 +22,7 @@ To change the parameters, we must insert a keyframe. Keyframes represent the poi
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut1.gif)
 
-This will rotate the camera. However, there isn't any animation yet because there is only one keyframe. To transition between two states of the camera, we should insert another keyframe later on in the clip. To insert a keyframe, first select a keyframe on the track you want to edit, then press the `Insert Keyframe` button. The button should change to the color of the curve. Then, click in the curve window at the place you want to insert the keyframe.
+This will rotate the camera. However, there isn't any animation yet because there is only one keyframe. To transition between two states of the camera, we need to insert another keyframe later on in the clip. To insert a keyframe, first select a keyframe on the track you want to edit, then press the `Insert Keyframe` button. The button should change to the color of the curve. Then, click in the curve window at the place you want to insert the keyframe.
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut2.gif)
 
@@ -82,7 +82,7 @@ Now, press `Add Track` to add a new track. This time, change the `Type` to `Obje
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/6.png)
 
-The items are organized into categories depending on their type. For example, all objects in the background will appear in the `Background` category, which is the default. The objects for the main doors in this case are `MainDoorL` and `MainDoorR`. Select either one from the `Object` dropdown:
+The objects are organized into categories depending on their type. For example, all objects in the background will appear in the `Background` category, which is the default. The objects for the main doors in this case are `MainDoorL` and `MainDoorR`. Select either one from the `Object` dropdown:
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/7.png)
 
