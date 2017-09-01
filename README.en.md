@@ -11,6 +11,8 @@ This is an animation tool for CM3D2. Play animations on maids and animate the pa
 Place `Assembly-CSharp.dll`, `UnityEngine.dll`, `ExIni.dll`, and `UnityInjector.dll` in a `References` directory one level up from the repo directory, then run `msbuild`.
 
 ## Usage
+**A step-by-step tutorial is available [here](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/blob/master/TUTORIAL.en.md).**
+
 Photo mode is recommended.
 
 ### Timeline View
