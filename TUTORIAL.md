@@ -55,7 +55,7 @@
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut8.gif)
 
-カーブは現在のカメラ位置を補足します。
+カーブは現在のカメラ位置を補足しました。
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/4.png)
 
