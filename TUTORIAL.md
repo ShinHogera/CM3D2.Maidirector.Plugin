@@ -109,7 +109,7 @@
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut19.gif)
 
-クリップの長さとモーションの速さを変更するには、`リサイズ`トグルをおします。
+クリップの長さとモーションの速さを変更するには、`リサイズ`トグルを押します。
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/10.png)
 
