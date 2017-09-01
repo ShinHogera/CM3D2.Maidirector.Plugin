@@ -36,8 +36,8 @@
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut5.gif)
 
-## カメラの細かい動作
-カーブの編集が難しい時には、自分でカメラを動かしてキーフレームとして補足できます。
+## カメラのキーフレーム捕捉
+カーブの編集が難しい時には、自分でカメラを動かしてキーフレームとして捕捉できます。
 
 まずは、カメラトラックの左の`E`ボタンを押してトラックを無効させましょう。カメラの動作を行いたくない時に便利な機能です。
 
@@ -55,7 +55,7 @@
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/tut8.gif)
 
-カーブは現在のカメラ位置を補足しました。
+カーブは現在のカメラ位置を捕捉しました。
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/4.png)
 
