@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace CM3D2.Maidirector.Plugin
@@ -30,6 +32,8 @@ namespace CM3D2.Maidirector.Plugin
 
         private CustomComboBox wrapBeforeBox;
         private CustomComboBox wrapAfterBox;
+        private CustomComboBox saveFileBox;
+        private CustomComboBox languageBox;
         private GUIStyle gsText;
 
         private Vector2 keyframeScrollPosition;
@@ -68,10 +72,29 @@ namespace CM3D2.Maidirector.Plugin
             get => pos + (scale / 2);
         }
 
+        public string selectedSaveName
+        {
+            get => this.saveFileBox.SelectedItem;
+        }
+
+        public string typedSaveName = "";
+
+        public string selectedLanguage
+        {
+            get => this.languageBox.SelectedItem;
+        }
+
+        public bool wantsLanguageChange { get; set; }
+
         public CurvePane()
         {
             this.curveTexture = (Texture2D)UnityEngine.Object.Instantiate(CurveTexture.textureBack);
             this.needsUpdate = true;
+
+            this.languageBox = new CustomComboBox( Translation.GetTranslations() );
+            this.languageBox.Text = Translation.GetText("UI", "language");
+            this.languageBox.SelectedItem = Translation.CurrentTranslation;
+            this.languageBox.SelectedIndexChanged += this.ChangeLanguage;
 
             this.wrapBeforeBox = new CustomComboBox(CURVE_WRAP_TYPES);
             this.wrapBeforeBox.Text = Translation.GetText("CurvePane", "wrapBefore");
@@ -91,9 +114,22 @@ namespace CM3D2.Maidirector.Plugin
             gsText = new GUIStyle("textarea");
             gsText.alignment = TextAnchor.UpperLeft;
 
+            this.saveFileBox = new CustomComboBox();
+            this.saveFileBox.Text = Translation.GetText("UI", "savefile");
+            this.saveFileBox.SelectedIndexChanged += (o, e) =>
+                {
+                    this.typedSaveName = this.saveFileBox.SelectedItem;
+                };
+            this.LoadSavefileNames();
+
             this.keyframeValueStrings = new string[2];
             this.keyframeValueStrings[0] = "";
             this.keyframeValueStrings[1] = "";
+        }
+
+        private void ChangeLanguage( object sender, EventArgs args )
+        {
+            this.wantsLanguageChange = true;
         }
 
         private Vector2 timeSpaceToScreenSpace(Vector2 vec, Rect rectItem)
@@ -564,6 +600,9 @@ namespace CM3D2.Maidirector.Plugin
 
         private void DrawCurveView(Rect curveRect, ref MovieCurveClip clip)
         {
+            if (clip.curves.Count == 0)
+                return;
+
             Rect curveAreaRect = new Rect(0, 0, curveRect.width / 4 * 3, curveRect.height);
 
             GUI.DrawTexture(curveAreaRect, this.curveTexture);
@@ -744,7 +783,7 @@ namespace CM3D2.Maidirector.Plugin
                     {
                         float percent = (float)iTmp / (float)clip.length;
                         selectedKeyframe.time = Mathf.Clamp01(percent);
-                        sTmp = iTmp.ToString();
+                        sTmp = ((int)(percent * clip.length)).ToString();
                         this.keyframeUpdated = true;
                     }
                     this.keyframeValueStrings[0] = sTmp;
@@ -786,25 +825,68 @@ namespace CM3D2.Maidirector.Plugin
 
         private void DrawKeyframeView(Rect curveRect, ref MovieCurveClip clip)
         {
+            if (clip.curves.Count == 0)
+                return;
+
             Rect keyframeViewRect = new Rect(0, 0, curveRect.width / 4 * 3, curveRect.height);
             this.keyframeScrollPanel(keyframeViewRect, ref clip);
             this.keyframeDetailPanel(curveRect, keyframeViewRect, ref clip);
         }
 
+        public void LoadSavefileNames()
+        {
+            this.saveFileBox.Items = Serialize.GetSaveFiles()
+                .Select(f => new GUIContent(Path.GetFileNameWithoutExtension(f.Name)))
+                .ToList();
+            if(this.saveFileBox.Items.Select(g => g.text).Contains(this.typedSaveName))
+                this.saveFileBox.SelectedItem = this.typedSaveName;
+            else if(this.saveFileBox.Items.Count > 0)
+                this.saveFileBox.SelectedIndex = 0;
+        }
+
         public bool wantsSave { get; set; }
         public bool wantsLoad { get; set; }
-        private void DrawDataView(Rect viewRect)
+        public void DrawDataView(Rect viewRect)
         {
-            Rect dataViewRect = new Rect(0, 0, viewRect.width / 4 * 3, viewRect.height/2);
-            if(GUI.Button(dataViewRect, "Save"))
+            Rect dataViewRect = new Rect(ControlBase.FixedMargin, ControlBase.FixedMargin, viewRect.width / 4, viewRect.height);
+
+            GUI.BeginGroup(dataViewRect);
+            Rect rectItem = new Rect(0, 0, dataViewRect.width / 3, 30);
+
+            GUI.Label(rectItem, Translation.GetText("UI", "name"));
+
+            rectItem.x += rectItem.width;
+            rectItem.width = dataViewRect.width / 3 * 2;
+            string sTmp = GUI.TextField(rectItem, this.typedSaveName);
+            if (sTmp != this.typedSaveName)
+            {
+                this.typedSaveName = sTmp;
+            }
+
+            rectItem.x = 0;
+            rectItem.width = dataViewRect.width;
+            rectItem.y += rectItem.height;
+            if(GUI.Button(rectItem, Translation.GetText("UI", "save")))
             {
                 this.wantsSave = true;
             }
-            dataViewRect.y += dataViewRect.height;
-            if(GUI.Button(dataViewRect, "Load"))
+
+            rectItem.y += rectItem.height + ControlBase.FixedMargin;
+            this.saveFileBox.SetFromRect(rectItem);
+            this.saveFileBox.OnGUI();
+
+            rectItem.y += rectItem.height;
+            if(GUI.Button(rectItem, Translation.GetText("UI", "load")) && this.saveFileBox.Items.Count > 0)
             {
+                this.typedSaveName = this.saveFileBox.SelectedItem;
                 this.wantsLoad = true;
             }
+
+            rectItem.y += rectItem.height + ControlBase.FixedMargin;
+            this.languageBox.SetFromRect(rectItem);
+            this.languageBox.OnGUI();
+
+            GUI.EndGroup();
         }
 
         private void RefreshSelectedClip(ref MovieCurveClip clip, int clipIndex, int trackIndex)
@@ -888,16 +970,28 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
-        public void Draw(Rect curveRect, Rect rectGui, List<MovieCurveClip> clips, int clipIndex, int trackIndex)
+        public void UpdateOffsets(Rect curveRect, Rect rectGui)
         {
-            this.wrapBeforeBox.ScreenPos = new Rect(curveRect.x + (curveRect.width / 4) * 3 + rectGui.x, curveRect.y  + rectGui.y + 20, 0, 0);
-            this.wrapAfterBox.ScreenPos = new Rect(curveRect.x + (curveRect.width / 4) * 3 + rectGui.x, curveRect.y  + rectGui.y + 20, 0, 0);
+            this.wrapBeforeBox.ScreenPos = new Rect(curveRect.x + (curveRect.width / 4) * 3 + rectGui.x,
+                                                    curveRect.y  + rectGui.y + 20,
+                                                    0, 0);
+            this.wrapAfterBox.ScreenPos = new Rect(curveRect.x + (curveRect.width / 4) * 3 + rectGui.x,
+                                                   curveRect.y  + rectGui.y + 20,
+                                                   0, 0);
+            this.saveFileBox.ScreenPos = new Rect(curveRect.x + rectGui.x, curveRect.y  + rectGui.y + 20, 0, 0);
+            this.languageBox.ScreenPos = new Rect(curveRect.x + rectGui.x, curveRect.y  + rectGui.y + 20, 0, 0);
+        }
 
+        public void Draw(Rect curveRect, List<MovieCurveClip> clips, int clipIndex, int trackIndex)
+        {
             this.needsUpdate = false;
+
             MovieCurveClip clip = clips[clipIndex];
 
             if (clip.curves.Count == 0)
+            {
                 return;
+            }
 
             if (this.SelectedClipChanged(ref clip, clipIndex, trackIndex))
             {

@@ -1,10 +1,6 @@
 <Translations>
   <Translation language="English">
       <Timeline>
-          <drag>Drag</drag>
-          <resize>Resize</resize>
-          <curve>Curve</curve>
-          <keyframe>Keyframe</keyframe>
           <frame>Frame</frame>
           <addTrack>Add Track</addTrack>
           <copyClip>Copy Clip</copyClip>
@@ -45,12 +41,18 @@
           <MaidAnimation>Maid Animation</MaidAnimation>
           <MaidFace>Maid Face</MaidFace>
 
-          <Camera>Camera</Camera>
           <Background>Background</Background>
+          <Maid>Maid</Maid>
+          <Camera>Camera</Camera>
           <All>All</All>
 
           <Curve>Curve</Curve>
           <Keyframe>Keyframe</Keyframe>
+          <Data>Data</Data>
+
+          <Drag>Drag</Drag>
+          <RightResize>Resize</RightResize>
+
           <Detail>Detail</Detail>
           <ToggleVisible>Toggle Visible</ToggleVisible>
 
@@ -66,10 +68,18 @@
           <PingPong>Ping Pong</PingPong>
           <ClampForever>Clamp Forever</ClampForever>
       </Enum>
+      <Component>
+      </Component>
+      <Property>
+      </Property>
       <UI>
           <language>Language</language>
           <ok>OK</ok>
           <cancel>Cancel</cancel>
+          <save>Save</save>
+          <load>Load</load>
+          <name>名前</name>
+          <savefile>File</savefile>
           <camera>Camera</camera>
           <posX>Position X</posX>
           <posY>Position Y</posY>
@@ -85,10 +95,6 @@
   </Translation>
   <Translation language="日本語">
       <Timeline>
-          <drag>ドラッグ</drag>
-          <resize>リサイズ</resize>
-          <curve>カーブ</curve>
-          <keyframe>キーフレーム</keyframe>
           <frame>フレーム</frame>
           <addTrack>トラック追加</addTrack>
           <copyClip>クリップ複製</copyClip>
@@ -129,12 +135,18 @@
           <MaidAnimation>メイドモーション</MaidAnimation>
           <MaidFace>メイド顔</MaidFace>
 
-          <Camera>カメラ</Camera>
           <Background>背景</Background>
+          <Maid>メイド</Maid>
+          <Camera>カメラ</Camera>
           <All>全部</All>
 
           <Curve>カーブ</Curve>
           <Keyframe>キーフレーム</Keyframe>
+          <Data>データ</Data>
+
+          <Drag>ドラッグ</Drag>
+          <RightResize>リサイズ</RightResize>
+
           <Detail>詳細</Detail>
           <ToggleVisible>表示・非表示</ToggleVisible>
 
@@ -150,9 +162,27 @@
           <PingPong>ピンポン</PingPong>
           <ClampForever>永遠クランプ</ClampForever>
       </Enum>
+      <Component>
+          <Transform>位置・回転・スケール</Transform>
+          <Light>ライト</Light>
+          <Camera>カメラ</Camera>
+          <UltimateOrbitCamera>軌道カメラ</UltimateOrbitCamera>
+      </Component>
+      <Property>
+          <position>位置</position>
+          <localPosition>位置（ローカル）</localPosition>
+          <eulerAngles>回転</eulerAngles>
+          <localEulerAngles>回転（ローカル）</localEulerAngles>
+          <localScale>スケール</localScale>
+          <fov>視野</fov>
+      </Property>
       <UI>
           <language>言語</language>
           <ok>OK</ok>
+          <save>セーブ</save>
+          <load>ロード</load>
+          <name>名前</name>
+          <savefile>ファイル</savefile>
           <cancel>キャンセル</cancel>
           <camera>カメラ</camera>
           <posX>位置Ｘ</posX>

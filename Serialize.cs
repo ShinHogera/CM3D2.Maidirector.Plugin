@@ -24,6 +24,16 @@ namespace CM3D2.Maidirector.Plugin
             return SAVE_DIR + @"\" + name + ".xml";
         }
 
+
+        public static List<FileInfo> GetSaveFiles()
+        {
+            Directory.CreateDirectory(SAVE_DIR);
+            DirectoryInfo info = new DirectoryInfo(SAVE_DIR);
+            List<FileInfo> files = info.GetFiles("*.xml").OrderBy(p => p.CreationTime).ToList();
+
+            return files;
+        }
+
         internal static string SerializeIntList(List<int> list) => string.Join(",", list.Select(x => x.ToString()).ToArray());
 
         internal static XElement SerializeKeyframe(Keyframe key, int tangentMode)
@@ -124,6 +134,10 @@ namespace CM3D2.Maidirector.Plugin
                                          SerializeMovieProperties(track));
 
             elem.SetAttributeValue("type", track.targetType);
+            if(track.targetType == MoviePropertyTrack.ObjectType.Maid)
+            {
+                elem.SetAttributeValue("maidGuid", track.GetMaidGUID());
+            }
             elem.SetAttributeValue("objectTag", track.target.tag);
             elem.SetAttributeValue("objectName", track.target.name);
             elem.SetAttributeValue("componentType", track.component.GetType());
@@ -165,5 +179,12 @@ namespace CM3D2.Maidirector.Plugin
             => new XDocument(new XElement("Take",
                                           SerializeTracks(take.tracks),
                                           SerializeEnvironment()));
+
+        internal static void Save(string fileName, MovieTake take)
+        {
+            string savePath = GetSavePath(fileName);
+            XDocument doc = SerializeTake(take);
+            doc.Save(savePath);
+        }
     }
 }

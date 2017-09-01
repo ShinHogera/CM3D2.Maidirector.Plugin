@@ -63,6 +63,9 @@ namespace CM3D2.Maidirector.Plugin
 
         public static bool HasTranslation( string translation ) => translations.ContainsKey(translation);
 
+        public static bool HasText(string category, string field) => HasTranslation(CurrentTranslation) &&
+            translations[ CurrentTranslation ].ContainsKey($"{category}_{field}");
+
         public static string GetText(string category, string field)
         {
             if(!translations.ContainsKey(CurrentTranslation))
@@ -77,6 +80,14 @@ namespace CM3D2.Maidirector.Plugin
                 return "ERROR " + key;
             }
             return translations[ CurrentTranslation ][ key ];
+        }
+
+        public static string TryGetText(string category, string original)
+        {
+            if(Translation.HasText(category, original))
+                original = Translation.GetText(category, original);
+
+            return original;
         }
 
         public static string[] GetEnum(Type type) =>

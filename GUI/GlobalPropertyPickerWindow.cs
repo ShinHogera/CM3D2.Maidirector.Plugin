@@ -132,13 +132,15 @@ namespace CM3D2.Maidirector.Plugin
             private void LoadProperties(Component component)
             {
                 this.properties = component.GetType().GetProperties().Where(pr => MovieProperty.IsSupportedType(pr.PropertyType)).ToList();
-                this.propertyBox.Items = this.properties.Select(pr => new GUIContent(pr.Name)).ToList();
+                this.propertyBox.Items = this.properties.Select(pr => new GUIContent(TryGetPropertyName(pr.Name))).ToList();
                 this.propertyBox.SelectedIndex = 0;
 
                 this.fields = component.GetType().GetFields().Where(fi => MovieProperty.IsSupportedType(fi.FieldType)).ToList();
-                this.fieldBox.Items = this.fields.Select(fi => new GUIContent(fi.Name)).ToList();
+                this.fieldBox.Items = this.fields.Select(fi => new GUIContent(TryGetPropertyName(fi.Name))).ToList();
                 this.fieldBox.SelectedIndex = 0;
             }
+
+            public static string TryGetPropertyName(String original) => Translation.TryGetText("Property", original);
 
             private void Ok(object sender, EventArgs args)
             {

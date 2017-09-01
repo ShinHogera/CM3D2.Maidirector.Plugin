@@ -25,6 +25,7 @@ namespace CM3D2.Maidirector.Plugin
         {
             Background,
             Static,
+            Maid,
             Other
         }
 
@@ -35,8 +36,6 @@ namespace CM3D2.Maidirector.Plugin
 
             this.target = go;
             this.component = c;
-
-            Debug.Log(go + " " + c);
 
             this.targetName = this.target.name;
             this.componentTypeName = this.component.GetType().Name;
@@ -153,7 +152,7 @@ namespace CM3D2.Maidirector.Plugin
             }
             if(this.component == null)
             {
-                Debug.Log(this.componentTypeName);
+                // Debug.Log("Attempting to reattach " + this.componentTypeName);
                 Type type = typeof(UnityEngine.Component).Assembly.GetType(this.componentTypeName);
                 this.component = this.target.GetComponent(type);
             }
@@ -179,6 +178,14 @@ namespace CM3D2.Maidirector.Plugin
                                 this.AddProp(new MovieProperty(pr));
                         });
             }
+        }
+
+        public string GetMaidGUID()
+        {
+            if(this.targetType == ObjectType.Maid)
+                return this.target.GetComponent<Maid>().Param.status.guid;
+
+            return null;
         }
     }
 
@@ -262,7 +269,7 @@ namespace CM3D2.Maidirector.Plugin
                 else if (propType == typeof(float))
                     propToChange.SetValue(target, values[0], null);
                 else if (propType == typeof(bool))
-                    propToChange.SetValue(target, values[0] > 0, null);
+                    propToChange.SetValue(target, values[0] >= 1, null);
                 else if (propType.IsEnum)
                     propToChange.SetValue(target, (int)values[0], null);
                 else if (propType == typeof(Vector3))
@@ -291,7 +298,7 @@ namespace CM3D2.Maidirector.Plugin
                 else if (fieldType == typeof(float))
                     fieldToChange.SetValue(target, values[0]);
                 else if (fieldType == typeof(bool))
-                    fieldToChange.SetValue(target, values[0] > 0);
+                    fieldToChange.SetValue(target, values[0] >= 1);
                 else if (fieldType.IsEnum)
                     fieldToChange.SetValue(target, (int)values[0]);
                 else if (fieldType == typeof(Vector3))

@@ -16,7 +16,7 @@ using UnityInjector.Attributes;
 namespace CM3D2.Maidirector.Plugin
 {
     #region PluginMain
-    [PluginFilter( "CM3D2x64" ), PluginFilter( "CM3D2x86" ), PluginFilter( "CM3D2VRx64" ), PluginName( "Maidirector" ), PluginVersion( "0.0.1.0" )]
+    [PluginFilter( "CM3D2x64" ), PluginFilter( "CM3D2x86" ), PluginFilter( "CM3D2VRx64" ), PluginName( "Maidirector" ), PluginVersion( "0.0.2.0" )]
     public class Maidirector : PluginBase
     {
         #region Methods

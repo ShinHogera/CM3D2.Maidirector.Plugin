@@ -46,12 +46,6 @@ namespace CM3D2.Maidirector.Plugin
         {
             try
             {
-                this.languageBox = new CustomComboBox( Translation.GetTranslations() );
-                this.languageBox.Text = Translation.GetText("UI", "language");
-                this.languageBox.SelectedItem = Translation.CurrentTranslation;
-                this.languageBox.SelectedIndexChanged += this.ChangeLanguage;
-                this.ChildControls.Add( this.languageBox );
-
                 this.playButton = new Plugin.CustomButton();
                 this.playButton.Text = "▶";
                 this.playButton.Click += this.Play;
@@ -217,15 +211,11 @@ namespace CM3D2.Maidirector.Plugin
                 //this.Height = GUIUtil.GetHeightForParent(this) + 5 * this.ControlHeight;
 
                 toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 2;
-                toggleRect.width *= 1.25f;
+                toggleRect.width *= 1.80f;
                 if ((iTmp = GUI.Toolbar(toggleRect, (int)this.curvePane.mode, CURVE_PANE_MODES)) >= 0)
                 {
                     this.curvePane.mode = (CurvePane.CurvePaneMode)iTmp;
                 }
-
-                toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 2;
-                this.languageBox.SetFromRect(toggleRect);
-                this.languageBox.OnGUI();
 
                 // toggleRect.x += toggleRect.width + ControlBase.FixedMargin * 4;
                 // string sTmp =
@@ -233,31 +223,41 @@ namespace CM3D2.Maidirector.Plugin
 
                 Rect curveRect = new Rect(0, toggleRect.yMax, 1000, 300);
                 this.curvePane.SetFromRect(curveRect);
+                this.curvePane.UpdateOffsets(curveRect, this.rectGui);
 
                 GUI.BeginGroup(curveRect);
                 if (this.ClipIsSelected())
-                    this.curvePane.Draw(curveRect, this.rectGui, this.take.tracks[this.selectedTrackIndex].clips, this.selectedClipIndex, this.selectedTrackIndex);
+                {
+                    this.curvePane.Draw(curveRect, this.take.tracks[this.selectedTrackIndex].clips, this.selectedClipIndex, this.selectedTrackIndex);
+                }
+                else if(this.IsDataView())
+                {
+                    this.curvePane.DrawDataView(curveRect);
+                }
                 GUI.EndGroup();
+
                 if (this.curvePane.needsUpdate)
                 {
                     this.updated = true;
                 }
                 if (this.curvePane.wantsSave)
                 {
-                    string savePath = Serialize.GetSavePath("test");
-                    XDocument doc = Serialize.SerializeTake(this.take);
-                    doc.Save(savePath);
+                    Serialize.Save(this.curvePane.typedSaveName, this.take);
+                    this.curvePane.LoadSavefileNames();
                     this.curvePane.wantsSave = false;
                 }
                 if (this.curvePane.wantsLoad)
                 {
-                    // TODO: make cleaner
-                    string loadPath = Serialize.GetSavePath("test");
-                    XDocument doc = XDocument.Load(loadPath);
+                    XDocument doc = Deserialize.LoadFileFromSave(this.curvePane.selectedSaveName);
 
                     List<string> guids = Deserialize.GetMaidGuids(doc);
                     this.maidLoader.SelectMaidsWithGuids(guids);
-                    this.maidLoader.onMaidsLoaded = () => this.take = Deserialize.DeserializeTake(doc);
+                    this.maidLoader.onMaidsLoaded = () => {
+                        this.take = Deserialize.DeserializeTake(doc);
+                        this.Stop(this, new EventArgs());
+                        this.Update();
+                    };
+
                     this.maidLoader.StartLoad();
 
                     this.curvePane.wantsLoad = false;
@@ -288,10 +288,12 @@ namespace CM3D2.Maidirector.Plugin
 
         private bool ClipIsSelected()
         {
-            return this.take.tracks.Count > 0 &&
+            return (this.take.tracks.Count > 0 &&
                 this.selectedTrackIndex < this.take.tracks.Count &&
-                this.selectedClipIndex < this.take.tracks[this.selectedTrackIndex].clips.Count;
+                    this.selectedClipIndex < this.take.tracks[this.selectedTrackIndex].clips.Count);
         }
+
+        private bool IsDataView() => this.curvePane.mode == CurvePane.CurvePaneMode.Data;
 
         private void FollowSeeker()
         {
@@ -350,20 +352,18 @@ namespace CM3D2.Maidirector.Plugin
 
         public void Stop(object sender, EventArgs args)
         {
-            if(isPlaying == false)
-            {
-                this.playTime = 0f;
-                this.scrollPosition.x = 0f;
-            }
             this.isPlaying = false;
+            this.playTime = 0f;
+            this.scrollPosition.x = 0f;
         }
 
         private void Add(object sender, EventArgs args)
         {
-            GlobalComponentPicker.Set(new Vector2(this.rectGui.x + 250, this.rectGui.y - 20), 250, this.FontSize, (existing) =>
+            GlobalComponentPicker.Set(new Vector2(this.rectGui.x + 300, this.rectGui.y - 20), 300, this.FontSize, (existing) =>
                     {
                         existing.InsertNewClip();
                         this.take.tracks.Add(existing);
+                        this.curvePane.mode = CurvePane.CurvePaneMode.Curve;
                         this.curvePane.SetUpdate();
                     });
         }
@@ -453,59 +453,6 @@ namespace CM3D2.Maidirector.Plugin
             }
         }
 
-        private void ChangeLanguage( object sender, EventArgs args )
-        {
-            this.wantsLanguageChange = true;
-        }
-
-        private int currentFrame
-        {
-            get =>(int)(this.seekerPos * posAdjustment);
-        }
-
-        public static readonly float FACTOR = 1f / 60f;
-
-        public static float zoom
-        {
-            get => 50.0f;
-        }
-
-        public static float posAdjustment
-        {
-            get => FACTOR * zoom;
-        }
-
-        public static float pixelsPerFrame
-        {
-            get => 1 / (FACTOR * zoom);
-        }
-
-        public static float framesPerSecond
-        {
-            get => 1 / FACTOR;
-        }
-
-        public string LanguageValue
-        {
-            get => this.languageBox.SelectedItem;
-        }
-
-        #region Fields
-        private static readonly string[] DRAG_MODES = new string[]
-            {
-                Translation.GetText("Timeline", "drag"),
-                Translation.GetText("Timeline", "resize"),
-            };
-
-        private static readonly string[] CURVE_PANE_MODES = new string[]
-            {
-                Translation.GetText("Timeline", "curve"),
-                Translation.GetText("Timeline", "keyframe"),
-                "Data"// Translation.GetText("Timeline", "data")
-            };
-
-        private bool isPlaying;
-
         private float _playTime;
         private float playTime
         {
@@ -535,14 +482,54 @@ namespace CM3D2.Maidirector.Plugin
             get => this.maidLoader != null && this.maidLoader.enableGui;
         }
 
-        public bool wantsLanguageChange { get; set; }
+        private int currentFrame
+        {
+            get => (int)(this.seekerPos * posAdjustment);
+        }
+
+        public static readonly float FACTOR = 1f / 60f;
+
+        public static float zoom
+        {
+            get => 50.0f;
+        }
+
+        public static float posAdjustment
+        {
+            get => FACTOR * zoom;
+        }
+
+        public static float pixelsPerFrame
+        {
+            get => 1 / (FACTOR * zoom);
+        }
+
+        public static float framesPerSecond
+        {
+            get => 1 / FACTOR;
+        }
+
+        public string LanguageValue
+        {
+            get => this.curvePane.selectedLanguage;
+        }
+
+        #region Fields
+        private static readonly string[] DRAG_MODES = Translation.GetEnum(typeof(DragMode));
+        private static readonly string[] CURVE_PANE_MODES = Translation.GetEnum(typeof(CurvePane.CurvePaneMode));
+
+        private bool isPlaying;
+
+        public bool wantsLanguageChange {
+            get => this.curvePane.wantsLanguageChange;
+            set => this.curvePane.wantsLanguageChange = value;
+        }
 
         private CustomButton playButton = null;
         private CustomButton stopButton = null;
         private CustomButton addButton = null;
         private CustomButton copyClipButton = null;
         private CustomButton deleteClipButton = null;
-        private CustomComboBox languageBox = null;
         public CurvePane curvePane;
 
         private Texture2D lineTexture = null;

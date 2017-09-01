@@ -58,6 +58,7 @@ These are the default keybindings, but they can be edited in the `UnityInjector/
 | M       | Open Timeline Window    |
 | Space   | Play/Pause Take         |
 | S       | Stop Take               |
+| Delete  | Hide UI                 |
 
 ## Known Issues
 - Keyframe curves may oscillate wildly if they're too close together. Set the keyframe tangent modes to `Linear` to prevent this.

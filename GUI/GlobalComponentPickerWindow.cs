@@ -15,7 +15,6 @@ namespace CM3D2.Maidirector.Plugin
             gsWin = new GUIStyle("box");
             gsWin.fontSize = Util.GetPix(12);
             gsWin.alignment = TextAnchor.UpperRight;
-
         }
 
         public static void Update()
@@ -174,12 +173,19 @@ namespace CM3D2.Maidirector.Plugin
                         .GetComponentsInChildren<Transform>()
                         .Select(t => t.gameObject)
                         .ToList();
+
                     this.gameObjects[ObjectCategory.Background].Add(GameMain.Instance.BgMgr.current_bg_object);
                 }
                 else
                 {
                     this.gameObjects[ObjectCategory.Background] = new List<GameObject>();
                 }
+
+                this.gameObjects[ObjectCategory.Maid] = Enumerable.Range(0, GameMain.Instance.CharacterMgr.GetMaidCount())
+                    .Select(GameMain.Instance.CharacterMgr.GetMaid)
+                    .Where(IsValidMaid)
+                    .Select(m => m.gameObject)
+                    .ToList();
 
                 this.gameObjects[ObjectCategory.Camera] = UnityEngine.Object.FindObjectsOfType<GameObject>()
                     .Where(IsCamera)
@@ -222,6 +228,7 @@ namespace CM3D2.Maidirector.Plugin
                 if (!this.gameObjects[this.selectedObjectCategory].Any())
                 {
                     this.objectBox.Items = new List<GUIContent>();
+                    this.componentBox.Items = new List<GUIContent>();
                     return;
                 }
 
@@ -239,9 +246,11 @@ namespace CM3D2.Maidirector.Plugin
                     return;
 
                 this.components = this.selectedObject.GetComponents<Component>().ToList();
-                this.componentBox.Items = this.components.Select(co => new GUIContent(co.GetType().Name)).ToList();
+                this.componentBox.Items = this.components.Select(co => new GUIContent(TryGetComponentName(co))).ToList();
                 this.componentBox.SelectedIndex = 0;
             }
+
+            public static string TryGetComponentName(Component co) => Translation.TryGetText("Component", co.GetType().Name);
 
             private void Ok(object sender, EventArgs args)
             {
@@ -364,8 +373,9 @@ namespace CM3D2.Maidirector.Plugin
 
             private enum ObjectCategory
             {
-                Camera,
                 Background,
+                Maid,
+                Camera,
                 All
             }
 

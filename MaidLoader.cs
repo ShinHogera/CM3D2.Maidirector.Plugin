@@ -126,6 +126,8 @@ namespace CM3D2.Maidirector.Plugin
 
         public void StartLoad()
         {
+            Debug.Log("MaidLoader: Starting to load maids...");
+
             this.isLoadMaid = true;
 
             this.ClearPlacementWindow();
@@ -220,28 +222,9 @@ namespace CM3D2.Maidirector.Plugin
                     }
                 }
 
-                Debug.Log("=== Start");
-                Debug.Log(this.maidArray.Length);
-                Debug.Log("=== Mid");
-                for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
-                {
-                    Maid maid = characterMgr.GetStockMaidList()[i];
-                    Debug.Log($"{i} {maid}");
-                    if(maid != null)
-                        Debug.Log($"{maid.Param.status.guid}");
-                }
-                Debug.Log("=== Maid");
-                for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
-                {
-                    Maid maid = maidArray[i];
-                    Debug.Log($"{i} {maid}");
-                    if(maid != null)
-                        Debug.Log($"{maid.Param.status.guid} {maid.body0.isLoadedBody}");
-                }
-                Debug.Log("=== End");
                 if(finished)
                 {
-                    Debug.Log("FINISH");
+                    Debug.Log("MaidLoader: Finished loading maids.");
                     this.isLoadMaid = false;
                 }
             }
@@ -309,19 +292,19 @@ namespace CM3D2.Maidirector.Plugin
 
                 if(maidsFinishedLoading)
                 {
-                    for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
-                    {
-                        Maid maid = maidArray[i];
-                        Debug.Log($"{i} {maid}");
-                        if(maid != null)
-                            Debug.Log($"{maid.Param.status.guid} {maid.body0.isLoadedBody}");
-                    }
                     if(!this.isBusyInit)
                     {
                         this.isBusyInit = true;
                     }
                     else
                     {
+                        // Debug.Log("List of maids:");
+                        // for(int i = 0; i < characterMgr.GetStockMaidCount(); i++)
+                        // {
+                        //     Maid maid = maidArray[i];
+                        //     if(maid != null)
+                        //         Debug.Log($"{i} {maid.Param.status.guid}");
+                        // }
                         for(int i = 0; i < this.maxMaidCnt; i++)
                         {
                             this.TryProcMaid(i);

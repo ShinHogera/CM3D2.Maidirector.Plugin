@@ -236,7 +236,7 @@ namespace CM3D2.Maidirector.Plugin
                     propIdxToCurveIdxes[i] = curveIdxes[i];
                 }
 
-                Debug.Log("Load: " + obj + " " + compo);
+                // Debug.Log("Load: " + obj + " " + compo);
                 MoviePropertyTrack track = new MoviePropertyTrack(obj, compo);
                 track.clips = DeserializeCurveClips(elem);
                 track.propsToChange = DeserializeMovieProperties(elem, componentType);
@@ -291,6 +291,13 @@ namespace CM3D2.Maidirector.Plugin
             take.tracks = DeserializeTracks(elem);
 
             return take;
+        }
+
+        internal static XDocument LoadFileFromSave(string saveName)
+        {
+            string loadPath = Serialize.GetSavePath(saveName);
+            XDocument doc = XDocument.Load(loadPath);
+            return doc;
         }
     }
 }
