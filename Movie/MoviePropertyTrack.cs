@@ -102,7 +102,8 @@ namespace CM3D2.Maidirector.Plugin
             float[] values = prop.GetValues(this.component);
             for (int j = 0; j < values.Length; j++)
             {
-                int curveIdx = clip.AddCurve(new MovieCurve(clip.length, values[j], prop.Name + "." + j));
+                int curveIdx = clip.AddCurve(new MovieCurve(clip.length, values[j],
+                                                            Translation.TryGetText("Property", prop.Name) + "." + j));
                 this.propIdxToCurveIdxes[index].Add(curveIdx);
             }
         }
