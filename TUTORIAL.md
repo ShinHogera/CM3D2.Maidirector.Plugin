@@ -80,7 +80,7 @@
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/6.png)
 
-オブジェクトはそれぞれの種類のカテゴリーに分けています。例えば、ドアーのオブジェクトは`背景`のカテゴリーにあります。この場合、エントランスのドアーは`MainDoorL`と`MainDoorR`です。どちらを`オブジェクトボックス`で選択してください。
+オブジェクトはそれぞれの種類のカテゴリーに分けています。例えば、ドアーのオブジェクトは`背景`のカテゴリーにあります。この場合、エントランスのドアーは`MainDoorL`と`MainDoorR`です。どちらを`オブジェクト`のボックスで選択してください。
 
 ![](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/raw/master/images/7.png)
 
