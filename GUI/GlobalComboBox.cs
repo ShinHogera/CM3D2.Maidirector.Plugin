@@ -120,22 +120,7 @@ namespace CM3D2.Maidirector.Plugin
                 }
                 GUI.EndScrollView();
 
-                {
-                    Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-
-                    bool enableGameGui = true;
-                    bool m = Input.GetAxis("Mouse ScrollWheel") != 0;
-                    for (int j = 0; j < 3; j++)
-                    {
-                        m |= Input.GetMouseButtonDown(j);
-                    }
-                    if (m)
-                    {
-                        enableGameGui = !rect.Contains(mousePos);
-                    }
-                    GameMain.Instance.MainCamera.SetControl(enableGameGui);
-                    UICamera.InputEnable = enableGameGui;
-                }
+                ControlBase.TryFocusGUI(rect);
 
                 if (GetAnyMouseButtonDown())
                 {

@@ -231,6 +231,24 @@ namespace CM3D2.Maidirector.Plugin
             this._childControls = this._childControls.OrderBy(c=>c.Top).ToList();
         }
 
+        public static void TryFocusGUI(Rect rectGui)
+        {
+            Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+
+            bool enableGameGui = true;
+            bool m = Input.GetAxis("Mouse ScrollWheel") != 0;
+            for (int i = 0; i < 3; i++)
+            {
+                m |= Input.GetMouseButtonDown(i);
+            }
+            if (m)
+            {
+                enableGameGui = !rectGui.Contains(mousePos);
+            }
+            GameMain.Instance.MainCamera.SetControl(enableGameGui);
+            UICamera.InputEnable = enableGameGui;
+        }
+
         ///-------------------------------------------------------------------------
         /// <summary>Window位置/サイズ</summary>
         ///-------------------------------------------------------------------------

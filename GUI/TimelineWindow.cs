@@ -123,11 +123,11 @@ namespace CM3D2.Maidirector.Plugin
                                           this.ControlHeight * 2);
 
                     GUILayout.BeginArea(panel);
+
                     track.DrawPanel(this.currentFrame / framesPerSecond);
 
                     if(track.inserted)
                         this.updated = true;
-
 
                     GUILayout.EndArea();
 
@@ -263,22 +263,7 @@ namespace CM3D2.Maidirector.Plugin
                     this.curvePane.wantsLoad = false;
                 }
 
-                {
-                    Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-
-                    bool enableGameGui = true;
-                    bool m = Input.GetAxis("Mouse ScrollWheel") != 0;
-                    for (int i = 0; i < 3; i++)
-                    {
-                        m |= Input.GetMouseButtonDown(i);
-                    }
-                    if (m)
-                    {
-                        enableGameGui = !rectGui.Contains(mousePos);
-                    }
-                    GameMain.Instance.MainCamera.SetControl(enableGameGui);
-                    UICamera.InputEnable = enableGameGui;
-                }
+                ControlBase.TryFocusGUI(this.rectGui);
             }
             catch (Exception e)
             {
