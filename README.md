@@ -11,6 +11,8 @@ CM3D2のアニメーションツールです。メイドにモーションを実
 `Assembly-CSharp.dll`, `UnityEngine.dll`, `ExIni.dll`, `UnityInjector.dll`を親ディレクトリにある`References`フォルダに入れて、`msbuild`を実行してください。
 
 ## 使用方法
+**チュトリアルは[こちら](https://github.com/ShinHogera/CM3D2.Maidirector.Plugin/blob/master/TUTORIAL.md)から見えます。**
+
 撮影モードは推薦します。
 
 ### タイムラインビュー

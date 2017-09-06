@@ -1,7 +1,7 @@
 # Tutorial
 This tutorial should (hopefully) present an overview of the various features available, and give some sense of an editing workflow.
 
-First, open the timeline window by pressing `M` (with the default keybindings).
+First, start Photo Mode and open the timeline window by pressing `M` (with the default keybindings).
 
 ## Animating the camera
 Most animations will probably animate the camera at some point, so let's start by manipulating the camera. To manipulate any object, including the camera, the corresponding track has to be added first.
